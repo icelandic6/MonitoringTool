@@ -22,13 +22,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\MonitoringToolWidget.cpp">
-      <Filter>Source Files\MainWidget</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="sources\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ServerMonitor.cpp">
+    <ClCompile Include="sources\MonitoringToolWidget.cpp">
+      <Filter>Source Files\MainWidget</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\ServerMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\TCPServerMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,11 +41,14 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\MonitoringToolWidget.h">
+    <QtMoc Include="sources\MonitoringToolWidget.h">
       <Filter>Source Files\MainWidget</Filter>
     </QtMoc>
-    <QtMoc Include="src\ServerMonitor.h">
+    <QtMoc Include="sources\ServerMonitor.h">
       <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="sources\TCPServerMonitor.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

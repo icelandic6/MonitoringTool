@@ -95,18 +95,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MonitoringToolWidget.cpp" />
-    <ClCompile Include="src\ServerMonitor.cpp" />
+    <ClCompile Include="sources\main.cpp" />
+    <ClCompile Include="sources\MonitoringToolWidget.cpp" />
+    <ClCompile Include="sources\ServerMonitor.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
+    <ClCompile Include="sources\TCPServerMonitor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\MonitoringToolWidget.h" />
+    <QtMoc Include="sources\MonitoringToolWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\ServerMonitor.h" />
+    <QtMoc Include="sources\ServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="sources\TCPServerMonitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
