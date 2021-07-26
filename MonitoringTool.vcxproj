@@ -55,6 +55,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
@@ -95,27 +96,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="sources\MonitoringToolWidget.cpp" />
-    <ClCompile Include="sources\ServerMonitor.cpp">
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\net\UDPServerMonitor.cpp" />
+    <ClCompile Include="src\ui\MonitoringToolWidget.cpp" />
+    <ClCompile Include="src\net\ServerMonitor.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
-    <ClCompile Include="sources\TCPServerMonitor.cpp" />
+    <ClCompile Include="src\net\TCPServerMonitor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="sources\MonitoringToolWidget.h" />
+    <QtMoc Include="src\ui\MonitoringToolWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="sources\ServerMonitor.h" />
+    <QtMoc Include="src\net\ServerMonitor.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="sources\TCPServerMonitor.h" />
+    <QtMoc Include="src\net\TCPServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\net\UDPServerMonitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
