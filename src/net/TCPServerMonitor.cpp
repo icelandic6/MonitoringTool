@@ -85,7 +85,7 @@ void TCPServerMonitor::checkServer()
     qDebug() << "==== Running TCP server check";
     d->_timeoutTimer.stop();
     d->_lastAttempt = false;
-
+    d->_socket->close();
 
     qDebug() << QString("==== TCP CHECK: CONNECTING TO %1:%2").arg(hostAddress()).arg(hostPort());
     d->_socket->connectToHost(hostAddress(), hostPort());

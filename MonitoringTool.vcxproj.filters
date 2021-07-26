@@ -37,6 +37,15 @@
     <ClCompile Include="src\net\UDPServerMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\net\ICMPServerMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\AsyncReply.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\ICMPRequestWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -56,5 +65,19 @@
     <QtMoc Include="src\net\UDPServerMonitor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\net\ICMPServerMonitor.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\net\ICMPRequestWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\net\ICMPMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\net\AsyncReply.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
