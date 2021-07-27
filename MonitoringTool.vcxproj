@@ -55,6 +55,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
@@ -62,6 +63,10 @@
     <ClCompile>
       <AdditionalIncludeDirectories>.\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(Qt_LIBPATH_);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -96,17 +101,39 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MonitoringToolWidget.cpp" />
-    <ClCompile Include="src\ServerMonitor.cpp" />
+    <ClCompile Include="src\net\ICMPRequestWorker.cpp" />
+    <ClCompile Include="src\net\ICMPServerMonitor.cpp" />
+    <ClCompile Include="src\net\UDPServerMonitor.cpp" />
+    <ClCompile Include="src\ui\MonitoringToolWidget.cpp" />
+    <ClCompile Include="src\net\ServerMonitor.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
+    <ClCompile Include="src\net\TCPServerMonitor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\MonitoringToolWidget.h" />
+    <QtMoc Include="src\ui\MonitoringToolWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="src\ServerMonitor.h" />
+    <QtMoc Include="src\net\ServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\net\TCPServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\net\UDPServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\net\ICMPServerMonitor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\net\ICMPMessage.h" />
+    <QtMoc Include="src\net\ICMPRequestWorker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

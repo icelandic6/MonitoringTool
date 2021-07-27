@@ -1,10 +1,10 @@
-#include "MonitoringToolWidget.h"
+#include "ui/MonitoringToolWidget.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-	MonitoringToolWidget w;
+	ui::MonitoringToolWidget w;
     w.show();
     return a.exec();
 }
