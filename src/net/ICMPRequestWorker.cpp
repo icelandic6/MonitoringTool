@@ -15,6 +15,9 @@ class ICMPRequestWorkerPrivate : public QObject
     Q_DISABLE_COPY(ICMPRequestWorkerPrivate)
     ICMPRequestWorker *q_ptr = nullptr;
 
+    ICMPMessage _message;
+    int _timeout;
+
 public:
     explicit ICMPRequestWorkerPrivate(ICMPRequestWorker *q)
         : q_ptr(q)
@@ -26,69 +29,35 @@ public:
     }
 };
 
-ICMPRequestWorker::ICMPRequestWorker(QObject *parent)
+ICMPRequestWorker::ICMPRequestWorker(ICMPMessage message, int timeout /*= 1000*/, QObject *parent /*= nullptr*/)
     : QObject(parent)
     , d_ptr(new ICMPRequestWorkerPrivate(this))
 {
-    qDebug() << QString("====== ICMPRequestWorker: created\n");
-    qDebug() << QString("====== ICMPRequestWorker: created in thread [%1]")
-        .arg(int(QThread::currentThreadId())) << QThread::currentThread();
     Q_D(ICMPRequestWorker);
+
+    d->_message = message;
+    d->_timeout = timeout;
 }
 
-// ICMPRequestWorker::~ICMPRequestWorker() = default;
 ICMPRequestWorker::~ICMPRequestWorker()
 {
-    qDebug() << "====== ICMPRequestWorker: destroyed";
 }
 
-void ICMPRequestWorker::send_request(ICMPMessage &message, int timeout)
+void ICMPRequestWorker::send_request()
 {
     Q_D(ICMPRequestWorker);
-    qDebug() << QString("====== ICMPRequestWorker: send_request");
-    qDebug() << QString("====== ICMPServerMonitor: send_request in thread [%1]")
-        .arg(int(QThread::currentThreadId())) << QThread::currentThread();
 
     DWORD dwRetVal = IcmpSendEcho(
-        message.hIcmpFile,
-        message.ipaddr,
-        message.SendData,
-        sizeof(message.SendData),
+        d->_message.hIcmpFile,
+        d->_message.ipaddr,
+        d->_message.SendData,
+        sizeof(d->_message.SendData),
         NULL,
-        message.ReplyBuffer,
-        message.ReplySize,
-        timeout);
+        d->_message.ReplyBuffer,
+        d->_message.ReplySize,
+        d->_timeout);
 
-    free(message.ReplyBuffer);
+    free(d->_message.ReplyBuffer);
 
     emit ready(dwRetVal != 0);
-
-//     if (dwRetVal != 0) {
-//         PICMP_ECHO_REPLY pEchoReply = (PICMP_ECHO_REPLY)icmpMessage.ReplyBuffer;
-//         struct in_addr ReplyAddr;
-//         ReplyAddr.S_un.S_addr = pEchoReply->Address;
-// 
-//         strMessage += QString("Sent ICMP message to %1\n").arg(hostAddress());
-// 
-//         if (icmpMessage.dwRetVal > 1) {
-//             strMessage += "Received " + QString::number(icmpMessage.dwRetVal) + " ICMP message responses \n";
-//             strMessage += "Information from the first response: ";
-//         }
-//         else {
-//             strMessage += "Received " + QString::number(icmpMessage.dwRetVal) + " ICMP message response \n";
-//             strMessage += "Information from the first response: ";
-//         }
-//         strMessage += "Received from ";
-//         strMessage += inet_ntoa(ReplyAddr);
-//         strMessage += "\n";
-//         strMessage += "Status = " + pEchoReply->Status;
-//         strMessage += "Roundtrip time = " + QString::number(pEchoReply->RoundTripTime) + " milliseconds \n";
-//         strMessage += "Roundtrip time = " + QString::number(pEchoReply->RoundTripTime) + " milliseconds \n";
-//     }
-//     else {
-//         strMessage += "Call to IcmpSendEcho failed.\n";
-//         strMessage += "IcmpSendEcho returned error: ";
-//         strMessage += QString::number(GetLastError());
-//     }
-
 }

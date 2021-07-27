@@ -74,14 +74,14 @@ private:
     {
         Q_Q(MonitoringToolWidget);
 
-        QString addr("google.com");
+//         QString addr("google.com");
 //         QString addr("127.0.0.1");
-//         QString addr("64.233.165.139");
+        QString addr("64.233.165.139");
 //         QString addr("http://example.com");
 
         _tcpServerMonitor = new TCPServerMonitor("TCP Host", addr, 80, q);
         _udpServerMonitor = new UDPServerMonitor("UDP Host", addr, 80, q);
-        _icmpServerMonitor = new ICMPServerMonitor("ICMP Host", addr, 80, q);
+        _icmpServerMonitor = new ICMPServerMonitor("ICMP Host", addr, q);
 
         connect(_tcpServerMonitor, &ServerMonitor::succeeded, this, [this]()
         {
@@ -108,7 +108,6 @@ private:
             pal.setColor(QPalette::Button, QColor(200, 100, 100));
             _checkUDPServerButton->setPalette(pal);
         });
-
 
         connect(_icmpServerMonitor, &ServerMonitor::succeeded, this, [this]()
         {
@@ -146,7 +145,8 @@ ui::MonitoringToolWidget::MonitoringToolWidget(QWidget *parent)
 {
 	Q_D(MonitoringToolWidget);
 
-	setMinimumSize(200, 100);
+	setMinimumSize(200, 120);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
 	d->createServerMonitors();
 

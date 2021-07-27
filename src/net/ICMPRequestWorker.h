@@ -10,16 +10,13 @@ class ICMPRequestWorker : public QObject
     Q_OBJECT
 
 public:
-    explicit ICMPRequestWorker(QObject *parent = nullptr);
+    ICMPRequestWorker(ICMPMessage message, int timeout = 1000, QObject *parent = nullptr);
     virtual ~ICMPRequestWorker();
 
-    void send_request(ICMPMessage &message, int timeout = 1000);
+    void send_request();
 
 signals:
     void ready(bool success);
-
-//     void success();
-//     void fail();
 
 private:
     QScopedPointer<ICMPRequestWorkerPrivate> d_ptr;
