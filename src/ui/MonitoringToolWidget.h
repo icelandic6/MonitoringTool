@@ -17,6 +17,11 @@ namespace ui
 
         virtual void resizeEvent(QResizeEvent *event) override;
 
+    signals:
+        void checkTCPServer();
+        void checkUDPServer();
+        void checkICMPServer();
+
     private:
         QScopedPointer<MonitoringToolWidgetPrivate> d_ptr;
         Q_DISABLE_COPY(MonitoringToolWidget)

@@ -49,7 +49,6 @@ void ICMPServerMonitor::checkServer()
     message.ReplySize = sizeof(ICMP_ECHO_REPLY) + sizeof(message.SendData);
     message.ReplyBuffer = (VOID*)malloc(message.ReplySize);
 
-
     auto _requestThread = new QThread();
 
     auto _requestWorker = new ICMPRequestWorker(message, 6000);

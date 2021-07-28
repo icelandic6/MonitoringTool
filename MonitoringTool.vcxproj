@@ -100,6 +100,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\MonitoringTool.cpp" />
+    <ClCompile Include="src\core\ServerMonitorsManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\net\ICMPRequestWorker.cpp" />
     <ClCompile Include="src\net\ICMPServerMonitor.cpp" />
@@ -133,6 +135,8 @@
     <QtMoc Include="src\net\ICMPServerMonitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="src\core\MonitoringTool.h" />
+    <QtMoc Include="src\core\ServerMonitorsManager.h" />
     <ClInclude Include="src\net\ICMPMessage.h" />
     <QtMoc Include="src\ui\ControlButton.h" />
     <QtMoc Include="src\net\ICMPRequestWorker.h" />

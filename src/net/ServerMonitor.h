@@ -26,6 +26,7 @@ public:
 	virtual void checkServer() = 0;
 
 signals:
+    void finished(bool success);
 	void succeeded();
 	void failed();
 

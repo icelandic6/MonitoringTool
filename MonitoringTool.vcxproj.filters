@@ -46,6 +46,12 @@
     <ClCompile Include="src\ui\ControlButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\MonitoringTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\ServerMonitorsManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -72,6 +78,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\ui\ControlButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\MonitoringTool.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\ServerMonitorsManager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

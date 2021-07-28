@@ -21,10 +21,6 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     QPushButton *_checkUDPServerButton = nullptr;
     QPushButton *_checkICMPServerButton = nullptr;
 
-    ServerMonitor *_tcpServerMonitor = nullptr;
-    ServerMonitor *_udpServerMonitor = nullptr;
-    ServerMonitor *_icmpServerMonitor = nullptr;
-
     Qt::Orientation _orientation = Qt::Vertical;
     ControlButton *_orientationButton = nullptr;
     ControlButton *_closeButton = nullptr;
@@ -94,59 +90,6 @@ private:
         Q_Q(MonitoringToolWidget);
         _closeButton = new ControlButton(":/MonitoringTool/close_icon.svg", q);
         _closeButton->setFixedSize(32, 32);
-    }
-
-    void createServerMonitors()
-    {
-        Q_Q(MonitoringToolWidget);
-
-//         QString addr("google.com");
-//         QString addr("127.0.0.1");
-        QString addr("64.233.165.139");
-//         QString addr("http://example.com");
-
-        _tcpServerMonitor = new TCPServerMonitor("TCP Host", addr, 80, q);
-        _udpServerMonitor = new UDPServerMonitor("UDP Host", addr, 80, q);
-        _icmpServerMonitor = new ICMPServerMonitor("ICMP Host", addr, q);
-
-        connect(_tcpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-        {
-            QPalette pal = _checkTCPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(100, 200, 100));
-            _checkTCPServerButton->setPalette(pal);
-        });
-        connect(_tcpServerMonitor, &ServerMonitor::failed, this, [this]()
-        {
-            QPalette pal = _checkTCPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(200, 100, 100));
-            _checkTCPServerButton->setPalette(pal);
-        });
-
-        connect(_udpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-        {
-            QPalette pal = _checkUDPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(100, 200, 100));
-            _checkUDPServerButton->setPalette(pal);
-        });
-        connect(_udpServerMonitor, &ServerMonitor::failed, this, [this]()
-        {
-            QPalette pal = _checkUDPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(200, 100, 100));
-            _checkUDPServerButton->setPalette(pal);
-        });
-
-        connect(_icmpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-        {
-            QPalette pal = _checkICMPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(100, 200, 100));
-            _checkICMPServerButton->setPalette(pal);
-        });
-        connect(_icmpServerMonitor, &ServerMonitor::failed, this, [this]()
-        {
-            QPalette pal = _checkICMPServerButton->palette();
-            pal.setColor(QPalette::Button, QColor(200, 100, 100));
-            _checkICMPServerButton->setPalette(pal);
-        });
     }
 
     void createLayouts()
@@ -298,25 +241,25 @@ ui::MonitoringToolWidget::MonitoringToolWidget(QWidget *parent)
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-	d->createServerMonitors();
-
     d->createOrientationButton();
     d->createMinimizeButton();
     d->createCloseButton();
 	d->createCheckServerButtons();
 	d->createLayouts();
 
-    connect(d->_checkTCPServerButton, &QPushButton::clicked, d->_tcpServerMonitor, &ServerMonitor::checkServer);
-    connect(d->_checkUDPServerButton, &QPushButton::clicked, d->_udpServerMonitor, &ServerMonitor::checkServer);
-    connect(d->_checkICMPServerButton, &QPushButton::clicked, d->_icmpServerMonitor, &ServerMonitor::checkServer);
-
     connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::changeOrientation);
     connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimizeApp);
     connect(d->_closeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::closeApp);
+
+
+    connect(d->_checkTCPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkTCPServer);
+    connect(d->_checkUDPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkUDPServer);
+    connect(d->_checkICMPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkICMPServer);
 }
 
 ui::MonitoringToolWidget::~MonitoringToolWidget()
 {
+    qDebug() << "\n==== MonitoringToolWidget: DESTROYED\n";
 }
 
 QSize ui::MonitoringToolWidget::sizeHint() const
