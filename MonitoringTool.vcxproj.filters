@@ -40,10 +40,10 @@
     <ClCompile Include="src\net\ICMPServerMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\net\AsyncReply.cpp">
+    <ClCompile Include="src\net\ICMPRequestWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\net\ICMPRequestWorker.cpp">
+    <ClCompile Include="src\ui\ControlButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,12 +71,12 @@
     <QtMoc Include="src\net\ICMPRequestWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\ui\ControlButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\net\ICMPMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\net\AsyncReply.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

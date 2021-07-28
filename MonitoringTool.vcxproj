@@ -104,6 +104,7 @@
     <ClCompile Include="src\net\ICMPRequestWorker.cpp" />
     <ClCompile Include="src\net\ICMPServerMonitor.cpp" />
     <ClCompile Include="src\net\UDPServerMonitor.cpp" />
+    <ClCompile Include="src\ui\ControlButton.cpp" />
     <ClCompile Include="src\ui\MonitoringToolWidget.cpp" />
     <ClCompile Include="src\net\ServerMonitor.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
@@ -133,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\net\ICMPMessage.h" />
+    <QtMoc Include="src\ui\ControlButton.h" />
     <QtMoc Include="src\net\ICMPRequestWorker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
