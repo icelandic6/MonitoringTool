@@ -1,4 +1,7 @@
 <RCC>
-    <qresource prefix="MonitoringTool">
+    <qresource prefix="/MonitoringTool">
+        <file>close_icon.svg</file>
+        <file>minimize_icon.svg</file>
+        <file>orientation_icon.svg</file>
     </qresource>
 </RCC>

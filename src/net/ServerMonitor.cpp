@@ -34,8 +34,6 @@ ServerMonitor::ServerMonitor(QString name, QString hostAddress, int port, QObjec
 {
     Q_D(ServerMonitor);
 
-    qDebug() << QString("====== ServerMonitor: host address = [%1]").arg(hostAddress);
-
     d->_friendlyServerName = name;
     d->_hostAddress = hostAddress;
     d->_hostPort = port;
@@ -56,30 +54,3 @@ int ServerMonitor::hostPort() const
 
     return d->_hostPort;
 }
-
-// void ServerMonitor::checkServer()
-// {
-// 	Q_D(ServerMonitor);
-// 
-// 	if (d->_protocol == ServerProtocol::TCP)
-// 	{
-// 		qDebug() << "==== Running TCP server check";
-// 		d->_socket = new QTcpSocket(this);
-// 
-// 		int metatype_id_2 = qRegisterMetaType<QTcpSocket::SocketError>("SocketError");
-// 
-// 		connect(d->_socket, &QTcpSocket::stateChanged, this, [this](QAbstractSocket::SocketState socketState)
-// 		{
-// 			qDebug() << QString("==== TCP CHECK: %1").arg(socketState);
-// 		});
-// 		connect(d->_socket, &QTcpSocket::connected, this, [this]()
-// 		{
-// 			qDebug() << QString("==== TCP CHECK: CONNECTED");
-// 		});
-// 
-// 		connect(d->_socket, SIGNAL(error(SocketError)),
-// 			this, SLOT(onError(QAbstractSocket::SocketError)));
-// 
-// 		d->_socket->connectToHost("google.comma", 80);
-// 	}
-// }
