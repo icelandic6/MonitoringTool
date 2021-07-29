@@ -12,7 +12,7 @@ namespace core
         Q_OBJECT
 
     public:
-        explicit ServerMonitorsManager(QObject *parent = nullptr);
+        explicit ServerMonitorsManager(int frequencySeconds, QObject *parent = nullptr);
         ~ServerMonitorsManager();
 
         void addServerMonitor(ServerMonitor *monitor);

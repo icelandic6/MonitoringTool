@@ -55,7 +55,7 @@ TCPServerMonitor::TCPServerMonitor(QString name, QString hostAddress, int port, 
         d->_timeoutTimer.stop();
 
         d->_socket->close();
-        emit succeeded();
+        emit finished(true);
     });
 
     connect(d->_socket, SIGNAL(error(SocketError)),
@@ -71,7 +71,7 @@ TCPServerMonitor::TCPServerMonitor(QString name, QString hostAddress, int port, 
         {
             qDebug() << QString("==== TCP CHECK: TIMEOUT STATE = %1").arg(d->_socket->state());
             d->_socket->close();
-            emit failed();
+            emit finished(false);
         }
     });
 }
@@ -102,5 +102,5 @@ void TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
     d->_lastAttempt = false;
     d->_socket->close();
 
-    emit failed();
+    emit finished(false);
 }

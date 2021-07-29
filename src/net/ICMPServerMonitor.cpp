@@ -62,10 +62,7 @@ void ICMPServerMonitor::checkServer()
 
     connect(_requestWorker, &ICMPRequestWorker::ready, this, [this](bool success)
     {
-        if (success)
-            emit succeeded();
-        else
-            emit failed();
+        emit finished(success);
     });
 
     _requestThread->start();

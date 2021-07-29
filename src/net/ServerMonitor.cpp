@@ -41,6 +41,13 @@ ServerMonitor::ServerMonitor(QString name, QString hostAddress, int port, QObjec
 
 ServerMonitor::~ServerMonitor() = default;
 
+QString ServerMonitor::name() const
+{
+    Q_D(const ServerMonitor);
+
+    return d->_friendlyServerName;
+}
+
 QString ServerMonitor::hostAddress() const
 {
     Q_D(const ServerMonitor);

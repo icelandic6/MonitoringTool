@@ -53,7 +53,7 @@ UDPServerMonitor::UDPServerMonitor(QString name, QString hostAddress, int port, 
         qDebug() << QString("==== UDP CHECK: CONNECTED");
 
         d->_socket->close();
-        emit succeeded();
+        emit finished(true);
     });
 
     connect(d->_socket, SIGNAL(error(SocketError)),
@@ -80,5 +80,5 @@ void UDPServerMonitor::onError(QAbstractSocket::SocketError socketError)
     Q_D(UDPServerMonitor);
 
     d->_socket->close();
-    emit failed();
+    emit finished(false);
 }

@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QTimer>
 
+
 class core::ServerMonitorsManagerPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(ServerMonitorsManager)
@@ -17,7 +18,7 @@ class core::ServerMonitorsManagerPrivate : public QObject
 
     QTimer _timer;
 
-    int _frequency = 15;
+    int _frequency = 8000;
     int _sensitivity = 5;
 
 public:
@@ -30,19 +31,33 @@ public:
 
     void runServersCheck()
     {
-//         for (auto const& monitor : _monitors)
-//         {
-//         }
+        qDebug() << "\n======= ServerMonitorsManager:runServersCheck: started ========\n";
+
+        for (auto const& monitor : _monitors)
+        {
+            qDebug() << "\n======= ServerMonitorsManager: check " 
+                << monitor->name()
+                << "\n";
+            monitor->checkServer();
+        }
+    }
+
+    void onMonitorFinished(bool success)
+    {
+        auto monitor = static_cast<ServerMonitor*>(sender());
+        qDebug() << "\n======= ServerMonitorsManager:onMonitorFinished: " << monitor->name() << " was "
+            << (success ? "successful" : "failed");
     }
 };
 
 
-core::ServerMonitorsManager::ServerMonitorsManager(QObject *parent)
+core::ServerMonitorsManager::ServerMonitorsManager(int frequencySeconds, QObject *parent)
     : QObject(parent)
     , d_ptr(new ServerMonitorsManagerPrivate(this))
 {
     Q_D(ServerMonitorsManager);
 
+    d->_frequency = frequencySeconds;
     d->_timer.setInterval(d->_frequency);
     d->_timer.setSingleShot(false);
 
@@ -58,45 +73,28 @@ void core::ServerMonitorsManager::addServerMonitor(ServerMonitor *monitor)
     Q_D(ServerMonitorsManager);
 
     d->_monitors.append(monitor);
+    connect(monitor, &ServerMonitor::finished, d, &ServerMonitorsManagerPrivate::onMonitorFinished);
 }
 
 void core::ServerMonitorsManager::addTCPServerMonitor(const QString &name, const QString &hostAddress, int port)
 {
     Q_D(ServerMonitorsManager);
 
-    d->_monitors.append(new TCPServerMonitor(name, hostAddress, 80, this));
+    addServerMonitor(new TCPServerMonitor(name, hostAddress, port, this));
 }
 
 void core::ServerMonitorsManager::addUDPServerMonitor(const QString &name, const QString &hostAddress, int port)
 {
     Q_D(ServerMonitorsManager);
 
-    d->_monitors.append(new UDPServerMonitor(name, hostAddress, 80, this));
+    addServerMonitor(new UDPServerMonitor(name, hostAddress, port, this));
 }
 
 void core::ServerMonitorsManager::addICMPServerMonitor(const QString &name, const QString &hostAddress)
 {
     Q_D(ServerMonitorsManager);
 
-    d->_monitors.append(new ICMPServerMonitor(name, hostAddress, this));
-}
-
-void core::ServerMonitorsManager::setFrequency(int frequencySeconds)
-{
-    Q_D(ServerMonitorsManager);
-
-    d->_frequency = frequencySeconds;
-
-    d->_timer.stop();
-    d->_timer.setInterval(d->_frequency);
-    d->_timer.start();
-}
-
-int core::ServerMonitorsManager::frequencySeconds() const
-{
-    Q_D(const ServerMonitorsManager);
-
-    return d->_frequency;
+    addServerMonitor(new ICMPServerMonitor(name, hostAddress, this));
 }
 
 void core::ServerMonitorsManager::setSensitivity(int sensitivity)
