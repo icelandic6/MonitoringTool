@@ -10,6 +10,7 @@ class TCPServerMonitorPrivate : public QObject
     TCPServerMonitor *q_ptr = nullptr;
 
     QAbstractSocket* _socket = nullptr;
+    int _port = 0;
 
     int _connectionTimeout = 3000;
     QTimer _timeoutTimer;
@@ -27,24 +28,25 @@ public:
     }
 };
 
-TCPServerMonitor::TCPServerMonitor(QString name, QString hostAddress, int port, QObject *parent)
-    : ServerMonitor(name, hostAddress, port, parent)
+TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *parent)
+    : ServerMonitor(address, parent)
     , d_ptr(new TCPServerMonitorPrivate(this))
 {
-    qDebug() << QString("====== TCPServerMonitor: host address = [%1]").arg(hostAddress);
+    qDebug() << QString("====== TCPServerMonitor: host address = [%1]").arg(address);
 
     Q_D(TCPServerMonitor);
     d->_timeoutTimer.setSingleShot(true);
     d->_timeoutTimer.setInterval(d->_connectionTimeout);
 
     d->_socket = new QTcpSocket(this);
+    d->_port = port;
 
     qRegisterMetaType<QTcpSocket::SocketError>("SocketError");
 
-    connect(d->_socket, &QTcpSocket::stateChanged, this, [this](QAbstractSocket::SocketState socketState)
-    {
-        qDebug() << QString("==== TCP CHECK: STATE %1").arg(socketState);
-    });
+//     connect(d->_socket, &QTcpSocket::stateChanged, this, [this](QAbstractSocket::SocketState socketState)
+//     {
+//         qDebug() << QString("==== TCP CHECK: STATE %1").arg(socketState);
+//     });
 
     connect(d->_socket, &QTcpSocket::connected, this, [this]()
     {
@@ -87,8 +89,8 @@ void TCPServerMonitor::checkServer()
     d->_lastAttempt = false;
     d->_socket->close();
 
-    qDebug() << QString("==== TCP CHECK: CONNECTING TO %1:%2").arg(hostAddress()).arg(hostPort());
-    d->_socket->connectToHost(hostAddress(), hostPort());
+    qDebug() << QString("==== TCP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
+    d->_socket->connectToHost(address(), d->_port);
     d->_timeoutTimer.start();
 }
 
@@ -97,6 +99,9 @@ void TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
     qDebug() << QString("==== TCP CHECK: ERROR [%1]").arg(socketError);
 
     Q_D(TCPServerMonitor);
+
+    if (!d->_timeoutTimer.isActive())
+        return;
 
     d->_timeoutTimer.stop();
     d->_lastAttempt = false;

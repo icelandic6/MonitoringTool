@@ -16,14 +16,11 @@ class ServerMonitor : public QObject
     Q_OBJECT
 
 public:
-//     ServerMonitor(QString name, QHostAddress hostAddress, int port, QObject *parent);
-    ServerMonitor(QString name, QString hostAddress, int port, QObject *parent);
+//     ServerMonitor(QString name, QHostAddress hostAddress, QObject *parent);
+    ServerMonitor(const QString &address, QObject *parent);
     virtual ~ServerMonitor();
 
-    QString name() const;
-    QString hostAddress() const;
-    //TODO: remove to TCP and UDP children as well as port arg in ctor
-    int hostPort() const;
+    QString address() const;
 
     virtual void checkServer() = 0;
 

@@ -1,5 +1,6 @@
 #include "MonitoringTool.h"
-#include "ServerMonitorsManager.h"
+#include "ServersManager.h"
+#include "ServerStatus.h"
 
 #include "ui/MonitoringToolWidget.h"
 
@@ -21,7 +22,7 @@ class core::MonitoringToolPrivate : public QObject
     ServerMonitor *_udpServerMonitor = nullptr;
     ServerMonitor *_icmpServerMonitor = nullptr;
 
-    ServerMonitorsManager *_monitorsManager = nullptr;
+    ServersManager *_serversManager = nullptr;
 
 public:
     explicit MonitoringToolPrivate(MonitoringTool *q)
@@ -40,60 +41,33 @@ private:
 
 //         QString addr("google.com");
 //         QString addr("127.0.0.1");
-        QString addr("64.233.165.139");
+        QString valid_addr("64.233.165.139");
+        QString invalid_addr("69.69.69.69");
 //         QString addr("http://example.com");
 
-        _tcpServerMonitor = new TCPServerMonitor("TCP Host", addr, 80, q);
-        _udpServerMonitor = new UDPServerMonitor("UDP Host", addr, 80, q);
-        _icmpServerMonitor = new ICMPServerMonitor("ICMP Host", addr, q);
+//         _tcpServerMonitor = new TCPServerMonitor("TCP Host", addr, 80, q);
+//         _udpServerMonitor = new UDPServerMonitor("UDP Host", addr, 80, q);
+//         _icmpServerMonitor = new ICMPServerMonitor("ICMP Host", "google.com", q);
 
-        _monitorsManager->addServerMonitor(_tcpServerMonitor);
-        _monitorsManager->addServerMonitor(_udpServerMonitor);
-        _monitorsManager->addServerMonitor(_icmpServerMonitor);
+//         _serversManager->addServerMonitor(_tcpServerMonitor);
+//         _serversManager->addServerMonitor(_udpServerMonitor);
+//         _serversManager->addServerMonitor(_icmpServerMonitor);
 
-//         connect(_tcpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-//         {
-//             QPalette pal = _checkTCPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(100, 200, 100));
-//             _checkTCPServerButton->setPalette(pal);
-//         });
-//         connect(_tcpServerMonitor, &ServerMonitor::failed, this, [this]()
-//         {
-//             QPalette pal = _checkTCPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(200, 100, 100));
-//             _checkTCPServerButton->setPalette(pal);
-//         });
-// 
-//         connect(_udpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-//         {
-//             QPalette pal = _checkUDPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(100, 200, 100));
-//             _checkUDPServerButton->setPalette(pal);
-//         });
-//         connect(_udpServerMonitor, &ServerMonitor::failed, this, [this]()
-//         {
-//             QPalette pal = _checkUDPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(200, 100, 100));
-//             _checkUDPServerButton->setPalette(pal);
-//         });
-// 
-//         connect(_icmpServerMonitor, &ServerMonitor::succeeded, this, [this]()
-//         {
-//             QPalette pal = _checkICMPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(100, 200, 100));
-//             _checkICMPServerButton->setPalette(pal);
-//         });
-//         connect(_icmpServerMonitor, &ServerMonitor::failed, this, [this]()
-//         {
-//             QPalette pal = _checkICMPServerButton->palette();
-//             pal.setColor(QPalette::Button, QColor(200, 100, 100));
-//             _checkICMPServerButton->setPalette(pal);
-//         });
+        _serversManager->addTCPServer("TCP Host", invalid_addr, 80);
+//         _serversManager->addUDPServer("UDP Host", valid_addr, 80);
+//         _serversManager->addICMPServer("ICMP Host", valid_addr);
+
+        connect(_serversManager, &ServersManager::serverStatusUpdated, this, [this](uint serverId, ServerStatus status)
+        {
+            QString s = (status == ServerStatus::Available) ? "AVAILABLE" : ((status == ServerStatus::Unstable) ? "UNSTABLE" : "FAILED");
+
+            qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
+        });
     }
 
     void createMonitorsManager()
     {
-        _monitorsManager = new ServerMonitorsManager(this);
+        _serversManager = new ServersManager(10000, 3, this);
     }
 
 public:
@@ -121,9 +95,9 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     d->_mtoolWidget = new ui::MonitoringToolWidget();
     d->_mtoolWidget->show();
 
-    connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkTCPServer, d->_tcpServerMonitor, &ServerMonitor::checkServer);
-    connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkUDPServer, d->_udpServerMonitor, &ServerMonitor::checkServer);
-    connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkICMPServer, d->_icmpServerMonitor, &ServerMonitor::checkServer);
+//     connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkTCPServer, d->_tcpServerMonitor, &ServerMonitor::checkServer);
+//     connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkUDPServer, d->_udpServerMonitor, &ServerMonitor::checkServer);
+//     connect(d->_mtoolWidget, &ui::MonitoringToolWidget::checkICMPServer, d->_icmpServerMonitor, &ServerMonitor::checkServer);
 }
 
 core::MonitoringTool::~MonitoringTool() = default;
