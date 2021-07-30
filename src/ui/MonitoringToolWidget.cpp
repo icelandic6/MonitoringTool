@@ -23,13 +23,14 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     ControlButton *_minimizeButton = nullptr;
     QList<ControlButton*> _controlButtons;
 
-    int _horizontalHeight = 48;
-    int _verticalWidth = 48;
+    const int _mainMargin = 4;
+    const int _cellsLength = 48;
 
-    QBoxLayout *_serversLayout = nullptr;
-    QBoxLayout *_buttonsLayout = nullptr;
-    QBoxLayout *_mainLayout = nullptr;
+    const int _rowsMax = 5;
 
+    QGridLayout *_statusesLayout = nullptr;
+    QGridLayout *_buttonsLayout = nullptr;
+    QGridLayout *_mainLayout = nullptr;
 
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
@@ -68,32 +69,95 @@ private:
             _statusWidgets[id] = new ServerStatusWidget(serversInfo[id], q);
     }
 
+    bool horizontal() const
+    {
+        return _orientation == Qt::Horizontal;
+    }
+
+    void removeLayouts()
+    {
+        if (_statusesLayout)
+            delete _statusesLayout;
+        if (_buttonsLayout)
+            delete _buttonsLayout;
+        if (_mainLayout)
+            delete _mainLayout;
+    }
+
     void createLayouts()
     {
         Q_Q(MonitoringToolWidget);
 
-        _serversLayout = new QHBoxLayout();
-        _serversLayout->setAlignment(Qt::AlignCenter);
-        _serversLayout->setContentsMargins(QMargins(0, 0, 0, 0));
-        _serversLayout->setSpacing(0);
+        _statusesLayout = new QGridLayout();
+        _statusesLayout->setAlignment(Qt::AlignCenter);
+        _statusesLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+        _statusesLayout->setSpacing(0);
 
-        for (auto button : _statusWidgets.values())
-            _serversLayout->addWidget(button);
+        if (_statusWidgets.size() <= _rowsMax)
+        {
+            int rc = 0;
+            for (auto sw : _statusWidgets.values())
+            {
+                _statusesLayout->addWidget(sw, horizontal() ? 0 : rc, horizontal() ? rc : 0, 2, 2);
+                rc += 2;
+            }
+        }
+        else
+        {
+            int rc = 0;
+            auto evenSize = _statusWidgets.size() % 2 == 0
+                ? _statusWidgets.size() / 2
+                : _statusWidgets.size() / 2 + 1;
+            int r = 0;
+            int c = 0;
 
-        _buttonsLayout = new QHBoxLayout();
+            for (auto sw : _statusWidgets.values())
+            {
+                _statusesLayout->addWidget(sw, r, c, 2, 2);
+                rc++;
+
+                if (horizontal())
+                {
+                    r = (rc < evenSize) ? 0 : 2;
+                    c += 2;
+                    if (c >= _statusWidgets.size())
+                        c = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
+                }
+                else
+                {
+                    c = (rc < evenSize) ? 0 : 2;
+                    r += 2;
+                    if (r >= _statusWidgets.size())
+                        r = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
+                }
+            }
+        }
+
+        _buttonsLayout = new QGridLayout();
         _buttonsLayout->setAlignment(Qt::AlignCenter);
         _buttonsLayout->setContentsMargins(QMargins(0, 0, 0, 0));
         _buttonsLayout->setSpacing(0);
 
+        int i = 0;
         for (auto button : _controlButtons)
-            _buttonsLayout->addWidget(button);
+        {
+            _buttonsLayout->addWidget(button, horizontal() ? 0 : i, horizontal() ? i : 0);
+            i++;
+        }
 
-        _mainLayout = new QHBoxLayout();
-        _mainLayout->setContentsMargins(QMargins(4, 0, 4, 0));
+        _mainLayout = new QGridLayout();
+        _mainLayout->setContentsMargins(QMargins(
+            horizontal() ? _mainMargin : 0,
+            horizontal() ? 0 : _mainMargin,
+            horizontal() ? _mainMargin : 0,
+            horizontal() ? 0 : _mainMargin
+        ));
         _mainLayout->setSpacing(0);
-        _mainLayout->addLayout(_serversLayout);
-        _mainLayout->addLayout(_buttonsLayout);
+        _mainLayout->addLayout(_statusesLayout, 0, 0);
+        _mainLayout->addLayout(_buttonsLayout, horizontal() ? 0 : 1, horizontal() ? 1 : 0);
+
         q->setLayout(_mainLayout);
+        q->setFixedSize(q->sizeHint());
     }
 
     void changeOrientation()
@@ -102,56 +166,8 @@ private:
 
         _orientation = (_orientation == Qt::Horizontal) ? Qt::Vertical : Qt::Horizontal;
 
-        QBoxLayout *mainLayout = nullptr;
-        QBoxLayout *serversLayout = nullptr;
-        QBoxLayout *buttonsLayout = nullptr;
-
-        if (_orientation == Qt::Horizontal)
-        {
-            mainLayout = new QHBoxLayout();
-            mainLayout->setContentsMargins(4, 0, 4, 0);
-
-            serversLayout = new QHBoxLayout();
-            buttonsLayout = new QHBoxLayout();
-        }
-        else
-        {
-            mainLayout = new QVBoxLayout();
-            mainLayout->setContentsMargins(0, 4, 0, 4);
-
-            serversLayout = new QVBoxLayout();
-            buttonsLayout = new QVBoxLayout();
-        }
-
-        serversLayout->setContentsMargins(0, 0, 0, 0);
-        serversLayout->setSpacing(0);
-        serversLayout->setAlignment(Qt::AlignCenter);
-
-        for (auto widget : _statusWidgets.values())
-            serversLayout->addWidget(widget);
-
-        buttonsLayout->setContentsMargins(0, 0, 0, 0);
-        buttonsLayout->setSpacing(0);
-        buttonsLayout->setAlignment(Qt::AlignCenter);
-
-        for (auto button : _controlButtons)
-           buttonsLayout->addWidget(button);
-
-        mainLayout->setSpacing(0);
-        mainLayout->setAlignment(Qt::AlignCenter);
-        mainLayout->addLayout(serversLayout);
-        mainLayout->addLayout(buttonsLayout);
-
-        delete _serversLayout;
-        delete _buttonsLayout;
-        delete _mainLayout;
-
-        _serversLayout = serversLayout;
-        _buttonsLayout = buttonsLayout;
-        _mainLayout = mainLayout;
-
-        q->setLayout(_mainLayout);
-        q->setFixedSize(q->sizeHint());
+        removeLayouts();
+        createLayouts();
     }
 
     void addServerStatusWidget(ushort id, const QString &name)
@@ -165,65 +181,46 @@ private:
     {
         Q_Q(const MonitoringToolWidget);
 
-        QSize size;
         auto spacing = q->layout()->spacing();
         auto m = q->layout()->contentsMargins();
         int w = 0, h = 0;
+        int evenSize = _statusWidgets.size() + (_statusWidgets.size() % 2 == 0 ? 0 : 1);
 
-        if (_orientation == Qt::Horizontal)
+        if (horizontal())
         {
-//             qDebug() << "==== MTWIDGET:SizeHint: horizontal all = " <<
-//                 QSize(m.left() +
-//                     _orientationButton->width() +
-//                     _minimizeButton->width() +
-//                     _closeButton->width() +
-//                     space * 3 +
-//                     m.right(),
-//                     _horizontalHeight) << "\n"
-//                 << "m.left = " << m.left() << "\n"
-//                 << "ori.width = " << _orientationButton->width() << "\n"
-//                 << "min.width = " << _minimizeButton->width() << "\n"
-//                 << "cls.width = " << _closeButton->width() << "\n"
-//                 << "space = " << space << "\n"
-//                 << "spacex3 = " << space * 3 << "\n"
-//                 << "m.right = " << m.right() << "\n";
+            w = _statusWidgets.size() <= _rowsMax
+                ? (_statusWidgets.size() * ServerStatusWidget::sizeSize())
+                : (evenSize / 2) * ServerStatusWidget::sizeSize();
 
-            for (auto sw : _statusWidgets)
-                w += sw->width();
-
-            w += spacing * (_statusWidgets.values().length() - 1);
+            w += spacing * (_statusWidgets.size() <= _rowsMax
+                           ? (_statusWidgets.size() - 1)
+                           : (evenSize / 2 - 1));
 
             for (auto button : _controlButtons)
                 w += button->width();
 
             w += spacing * (_controlButtons.length() - 1);
+            h = _cellsLength * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
 
-            return QSize(m.left() + w + m.right(), _horizontalHeight);
+            return QSize(m.left() + w + m.right(), h);
         }
         else
         {
-//             qDebug() << "==== MTWIDGET:SizeHint: vertical all = " <<
-//                 QSize(_verticalWidth, 
-//                     m.top() +
-//                     _orientationButton->height() +
-//                     space * 3 +
-//                     m.bottom()) << "\n"
-//                 << "m.top = " << m.top() << "\n"
-//                 << "ori.height = " << _orientationButton->height() << "\n"
-//                 << "space = " << space << "\n"
-//                 << "spacex3 = " << space * 3 << "\n"
-//                 << "m.bottom = " << m.bottom() << "\n";
-            for (auto sw : _statusWidgets)
-                w += sw->height();
+            h = _statusWidgets.size() <= _rowsMax
+                ? (_statusWidgets.size() * ServerStatusWidget::sizeSize())
+                : (evenSize / 2) * ServerStatusWidget::sizeSize();
 
-            w += spacing * (_statusWidgets.values().length() - 1);
+            h += spacing * (_statusWidgets.size() <= _rowsMax
+                ? (_statusWidgets.size() - 1)
+                : (evenSize / 2 - 1));
 
             for (auto button : _controlButtons)
-                w += button->height();
+                h += button->height();
 
-            w += spacing * (_controlButtons.length() - 1);
+            h += spacing * (_controlButtons.length() - 1);
+            w = _cellsLength * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
 
-            return QSize(_verticalWidth, m.top() + w + m.bottom());
+            return QSize(w, m.top() + h + m.bottom());
         }
     }
 

@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QDebug>
 
+static int sizeSize = 40;
+
 class ui::ServerStatusWidgetPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(ServerStatusWidget)
@@ -12,6 +14,7 @@ class ui::ServerStatusWidgetPrivate : public QObject
 
     QColor _color = QColor(100, 200, 100);
     qreal _radius = 11.5;
+
 
     QString _name;
 
@@ -32,7 +35,7 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 {
     Q_D(ServerStatusWidget);
 
-    setFixedSize(40, 40);
+    setFixedSize(::sizeSize, ::sizeSize);
 
     d->_name = name;
 
@@ -70,4 +73,9 @@ void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
     painter.drawEllipse(QPointF(rect().width() / 2, rect().height() / 2), d->_radius, d->_radius);
 
     QWidget::paintEvent(event);
+}
+
+int ui::ServerStatusWidget::sizeSize()
+{
+    return ::sizeSize;
 }

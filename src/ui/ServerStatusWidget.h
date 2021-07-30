@@ -16,6 +16,8 @@ namespace ui
 
         void setStatus(ServerStatus status);
 
+        static int sizeSize();
+
     protected:
         virtual void paintEvent(QPaintEvent *event) override;
 
