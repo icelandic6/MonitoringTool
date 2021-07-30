@@ -5,32 +5,30 @@
 
 enum class ServerProtocol
 {
-	TCP,
-	UDP,
-	ICMP,
+    TCP,
+    UDP,
+    ICMP,
 };
 
 class ServerMonitorPrivate;
 class ServerMonitor : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-//     ServerMonitor(QString name, QHostAddress hostAddress, int port, QObject *parent);
-    ServerMonitor(QString name, QString hostAddress, int port, QObject *parent);
+//     ServerMonitor(QString name, QHostAddress hostAddress, QObject *parent);
+    ServerMonitor(const QString &address, QObject *parent);
     virtual ~ServerMonitor();
 
-    QString hostAddress() const;
-    int hostPort() const;
+    QString address() const;
 
-	virtual void checkServer() = 0;
+    virtual void checkServer() = 0;
 
 signals:
-	void succeeded();
-	void failed();
+    void finished(bool success);
 
 private:
-	QScopedPointer<ServerMonitorPrivate> d_ptr;
-	Q_DISABLE_COPY(ServerMonitor)
-	Q_DECLARE_PRIVATE(ServerMonitor)
+    QScopedPointer<ServerMonitorPrivate> d_ptr;
+    Q_DISABLE_COPY(ServerMonitor)
+    Q_DECLARE_PRIVATE(ServerMonitor)
 };

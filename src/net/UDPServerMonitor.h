@@ -11,7 +11,7 @@ class UDPServerMonitor : public ServerMonitor
     Q_OBJECT
 
 public:
-    UDPServerMonitor(QString name, QString hostAddress, int port, QObject *parent);
+    UDPServerMonitor(const QString &address, int port, QObject *parent);
     virtual ~UDPServerMonitor() override;
 
     void checkServer() override;

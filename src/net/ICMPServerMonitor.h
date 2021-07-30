@@ -11,7 +11,7 @@ class ICMPServerMonitor : public ServerMonitor
     Q_OBJECT
 
 public:
-    ICMPServerMonitor(QString name, QString hostAddress, QObject *parent);
+    ICMPServerMonitor(const QString &address, QObject *parent);
     virtual ~ICMPServerMonitor() override;
 
     void checkServer() override;

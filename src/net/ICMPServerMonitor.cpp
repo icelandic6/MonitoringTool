@@ -27,10 +27,11 @@ public:
     }
 };
 
-ICMPServerMonitor::ICMPServerMonitor(QString name, QString hostAddress, QObject *parent)
-    : ServerMonitor(name, hostAddress, 0, parent)
+ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *parent)
+    : ServerMonitor(address, parent)
     , d_ptr(new ICMPServerMonitorPrivate(this))
 {
+    qDebug() << QString("====== ICMPServerMonitor: host address = [%1]").arg(address);
 }
 
 ICMPServerMonitor::~ICMPServerMonitor() = default;
@@ -43,12 +44,11 @@ void ICMPServerMonitor::checkServer()
 
     ICMPMessage message;
 
-    message.ipaddr = inet_addr(hostAddress().toStdString().c_str());
+    message.ipaddr = inet_addr(address().toStdString().c_str());
     message.hIcmpFile = IcmpCreateFile();
 
     message.ReplySize = sizeof(ICMP_ECHO_REPLY) + sizeof(message.SendData);
     message.ReplyBuffer = (VOID*)malloc(message.ReplySize);
-
 
     auto _requestThread = new QThread();
 
@@ -63,10 +63,7 @@ void ICMPServerMonitor::checkServer()
 
     connect(_requestWorker, &ICMPRequestWorker::ready, this, [this](bool success)
     {
-        if (success)
-            emit succeeded();
-        else
-            emit failed();
+        emit finished(success);
     });
 
     _requestThread->start();
