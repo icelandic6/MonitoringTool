@@ -22,9 +22,7 @@ public:
     {
     }
 
-    ~ICMPServerMonitorPrivate()
-    {
-    }
+    ~ICMPServerMonitorPrivate() = default;
 };
 
 ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *parent)

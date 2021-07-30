@@ -1,7 +1,5 @@
 #include "MonitoringToolWidget.h"
-#include "net/TCPServerMonitor.h"
-#include "net/UDPServerMonitor.h"
-#include "net/ICMPServerMonitor.h"
+#include "ServerStatusWidget.h"
 
 #include "ui/ControlButton.h"
 
@@ -17,17 +15,19 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     Q_DISABLE_COPY(MonitoringToolWidgetPrivate)
     MonitoringToolWidget *q_ptr = nullptr;
 
-    QPushButton *_checkTCPServerButton = nullptr;
-    QPushButton *_checkUDPServerButton = nullptr;
-    QPushButton *_checkICMPServerButton = nullptr;
+    QMap<ushort, ServerStatusWidget*> _statusWidgets;
 
-    Qt::Orientation _orientation = Qt::Vertical;
+    Qt::Orientation _orientation = Qt::Horizontal;
     ControlButton *_orientationButton = nullptr;
     ControlButton *_closeButton = nullptr;
     ControlButton *_minimizeButton = nullptr;
+    QList<ControlButton*> _controlButtons;
 
-    int _horizontalHeight = 48;
-    int _verticalWidth = 48;
+    const int _rowsMax = 5;
+
+    QGridLayout *_statusesLayout = nullptr;
+    QGridLayout *_buttonsLayout = nullptr;
+    QGridLayout *_mainLayout = nullptr;
 
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
@@ -35,205 +35,184 @@ public:
     {
     }
 
-    ~MonitoringToolWidgetPrivate()
-    {
-    }
+    ~MonitoringToolWidgetPrivate() = default;
 
 private:
-    QPushButton* createServerButton(const QString &name, const QString &iconPath = QString())
+    ControlButton* createControlButton(const QString &iconPath)
     {
         Q_Q(MonitoringToolWidget);
 
-        auto button = new QPushButton(name, q);
-        button->setFixedSize(48, 48);
-        button->setAutoFillBackground(true);
-
-        if (!iconPath.isEmpty())
-            button->setIcon(QIcon(iconPath));
-
-        connect(button, &QPushButton::pressed, this, [button]()
-        {
-            QPalette pal = button->palette();
-            pal.setColor(QPalette::Button, QColor(100, 100, 100));
-            button->setPalette(pal);
-        });
-
+        auto button = new ControlButton(iconPath, q);
+        _controlButtons.append(button);
         return button;
     }
 
-    void createCheckServerButtons()
+    void createControlButtons()
     {
-        Q_Q(MonitoringToolWidget);
-
-        _checkTCPServerButton = createServerButton("TCP");
-        _checkUDPServerButton = createServerButton("UDP");
-        _checkICMPServerButton = createServerButton("ICMP");
+        _orientationButton = createControlButton(QString(":/MonitoringTool/orientation_icon.svg"));
+        _minimizeButton = createControlButton(QString(":/MonitoringTool/minimize_icon.svg"));
+        _closeButton = createControlButton(QString(":/MonitoringTool/close_icon.svg"));
     }
 
-    void createOrientationButton()
+    void addServers(const QMap<ushort, QString> &serversInfo)
     {
         Q_Q(MonitoringToolWidget);
 
-        _orientationButton = new ControlButton(":/MonitoringTool/orientation_icon.svg", q);
-        _orientationButton->setFixedSize(32, 32);
+        for (const auto id : serversInfo.keys())
+            _statusWidgets[id] = new ServerStatusWidget(serversInfo[id], q);
     }
 
-    void createMinimizeButton()
+    bool horizontal() const
     {
-        Q_Q(MonitoringToolWidget);
-        _minimizeButton = new ControlButton(":/MonitoringTool/minimize_icon.svg", q);
-        _minimizeButton->setFixedSize(32, 32);
+        return _orientation == Qt::Horizontal;
     }
 
-    void createCloseButton()
+    void updateStatusesLayout()
     {
-        Q_Q(MonitoringToolWidget);
-        _closeButton = new ControlButton(":/MonitoringTool/close_icon.svg", q);
-        _closeButton->setFixedSize(32, 32);
+        int rc = 0;
+
+        if (_statusWidgets.size() <= _rowsMax)
+        {
+            for (const auto &sw : _statusWidgets.values())
+            {
+                _statusesLayout->addWidget(sw, horizontal() ? 0 : rc, horizontal() ? rc : 0, 2, 2);
+                rc += 2;
+            }
+        }
+        else
+        {
+            auto evenSize = _statusWidgets.size() % 2 == 0
+                ? _statusWidgets.size() / 2
+                : _statusWidgets.size() / 2 + 1;
+            int r = 0;
+            int c = 0;
+
+            for (const auto &sw : _statusWidgets.values())
+            {
+                _statusesLayout->addWidget(sw, r, c, 2, 2);
+                rc++;
+
+                if (horizontal())
+                {
+                    r = (rc < evenSize) ? 0 : 2;
+                    c += 2;
+                    if (c >= _statusWidgets.size())
+                        c = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
+                }
+                else
+                {
+                    c = (rc < evenSize) ? 0 : 2;
+                    r += 2;
+                    if (r >= _statusWidgets.size())
+                        r = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
+                }
+            }
+        }
     }
 
     void createLayouts()
     {
         Q_Q(MonitoringToolWidget);
 
-        auto mainLayout = new QVBoxLayout();
-        mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
-        mainLayout->setSpacing(0);
-        mainLayout->addWidget(_checkTCPServerButton, 0, Qt::AlignCenter);
-        mainLayout->addWidget(_checkUDPServerButton, 0, Qt::AlignCenter);
-        mainLayout->addWidget(_checkICMPServerButton, 0, Qt::AlignCenter);
+        _statusesLayout = new QGridLayout();
+        _statusesLayout->setAlignment(Qt::AlignCenter);
+        _statusesLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+        _statusesLayout->setSpacing(0);
+        updateStatusesLayout();
 
-        mainLayout->addWidget(_orientationButton, 0, Qt::AlignCenter);
-        mainLayout->addWidget(_minimizeButton, 0, Qt::AlignCenter);
-        mainLayout->addWidget(_closeButton , 0, Qt::AlignCenter);
+        _buttonsLayout = new QGridLayout();
+        _buttonsLayout->setAlignment(Qt::AlignCenter);
+        _buttonsLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+        _buttonsLayout->setSpacing(0);
 
-        q->setLayout(mainLayout);
+        int i = 0;
+        for (const auto &button : _controlButtons)
+        {
+            _buttonsLayout->addWidget(button, horizontal() ? 0 : i, horizontal() ? i : 0);
+            i++;
+        }
+
+        _mainLayout = new QGridLayout();
+        _mainLayout->setContentsMargins(QMargins(4, 4, 4, 4));
+        _mainLayout->setSpacing(0);
+        _mainLayout->addLayout(_statusesLayout, 0, 0);
+        _mainLayout->addLayout(_buttonsLayout, horizontal() ? 0 : 1, horizontal() ? 1 : 0);
+
+        q->setLayout(_mainLayout);
+        q->setFixedSize(q->sizeHint());
     }
 
-    void changeOrientation()
+    void removeLayouts()
+    {
+        if (_statusesLayout)
+            delete _statusesLayout;
+        if (_buttonsLayout)
+            delete _buttonsLayout;
+        if (_mainLayout)
+            delete _mainLayout;
+    }
+
+    void rotate()
     {
         Q_Q(MonitoringToolWidget);
 
         _orientation = (_orientation == Qt::Horizontal) ? Qt::Vertical : Qt::Horizontal;
 
-        auto spacing = q->layout()->spacing();
-        auto margins = q->layout()->contentsMargins();
-
-        QLayout *layout;
-
-        if (_orientation == Qt::Horizontal)
-            layout = new QHBoxLayout();
-        else
-            layout = new QVBoxLayout();
-
-        layout->setContentsMargins(margins);
-        layout->setSpacing(spacing);
-
-        layout->addWidget(_checkTCPServerButton);
-        layout->addWidget(_checkUDPServerButton);
-        layout->addWidget(_checkICMPServerButton);
-        layout->addWidget(_orientationButton);
-        layout->addWidget(_minimizeButton);
-        layout->addWidget(_closeButton);
-
-        delete q->layout();
-
-        q->setLayout(layout);
-        q->setFixedSize(q->sizeHint());
+        removeLayouts();
+        createLayouts();
     }
 
     QSize sizeHint() const
     {
         Q_Q(const MonitoringToolWidget);
 
-        QSize size;
-        auto space = q->layout()->spacing();
+        auto spacing = q->layout()->spacing();
         auto m = q->layout()->contentsMargins();
-        int w, h = 0;
+        int w = 0, h = 0;
+        int evenSize = _statusWidgets.size() + (_statusWidgets.size() % 2 == 0 ? 0 : 1);
+        
+        int cellsSize = _statusWidgets.size() <= _rowsMax
+            ? (_statusWidgets.size() * ServerStatusWidget::cellSize())
+            : (evenSize / 2) * ServerStatusWidget::cellSize();
+        int cellsSpacing = spacing * (_statusWidgets.size() <= _rowsMax
+                                     ? (_statusWidgets.size() - 1)
+                                     : (evenSize / 2 - 1));
 
-        if (_orientation == Qt::Horizontal)
+        int buttonsLength = _controlButtons.size() * ControlButton::buttonSize();
+        int buttonsSpacing = spacing * (_controlButtons.size() - 1);
+
+        if (horizontal())
         {
-//             qDebug() << "==== MTWIDGET:SizeHint: horizontal all = " <<
-//                 QSize(m.left() +
-//                     _checkTCPServerButton->width() +
-//                     _checkTCPServerButton->width() +
-//                     _checkTCPServerButton->width() +
-//                     _orientationButton->width() +
-//                     _minimizeButton->width() +
-//                     _closeButton->width() +
-//                     space * 3 +
-//                     m.right(),
-//                     _horizontalHeight) << "\n"
-//                 << "m.left = " << m.left() << "\n"
-//                 << "tcp.width = " <<_checkTCPServerButton->width() << "\n"
-//                 << "udp.width = " << _checkTCPServerButton->width() << "\n"
-//                 << "icmp.width = " << _checkTCPServerButton->width() << "\n"
-//                 << "ori.width = " << _orientationButton->width() << "\n"
-//                 << "min.width = " << _minimizeButton->width() << "\n"
-//                 << "cls.width = " << _closeButton->width() << "\n"
-//                 << "space = " << space << "\n"
-//                 << "spacex3 = " << space * 3 << "\n"
-//                 << "m.right = " << m.right() << "\n";
+            w = cellsSize;
+            w += cellsSpacing;
+            w += buttonsLength;
 
-            return QSize(m.left() +
-                         _checkTCPServerButton->width() +
-                         _checkTCPServerButton->width() +
-                         _checkTCPServerButton->width() +
-                         _orientationButton->width() +
-                         _minimizeButton->width() +
-                         _closeButton->width() +
-                         space * 5 +
-                         m.right(),
-                         _horizontalHeight);
+            w += buttonsSpacing;
+            h = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
         else
         {
-//             qDebug() << "==== MTWIDGET:SizeHint: vertical all = " <<
-//                 QSize(_verticalWidth, 
-//                     m.top() +
-//                     _checkTCPServerButton->height() +
-//                     _checkTCPServerButton->height() +
-//                     _checkTCPServerButton->height() +
-//                     _orientationButton->height() +
-//                     space * 3 +
-//                     m.bottom()) << "\n"
-//                 << "m.top = " << m.top() << "\n"
-//                 << "tcp.height = " << _checkTCPServerButton->height() << "\n"
-//                 << "udp.height = " << _checkTCPServerButton->height() << "\n"
-//                 << "icmp.height = " << _checkTCPServerButton->height() << "\n"
-//                 << "ori.height = " << _orientationButton->height() << "\n"
-//                 << "space = " << space << "\n"
-//                 << "spacex3 = " << space * 3 << "\n"
-//                 << "m.bottom = " << m.bottom() << "\n";
+            h = cellsSize;
+            h += cellsSpacing;
+            h += buttonsLength;
 
-            return QSize(_verticalWidth,
-                m.top() +
-                _checkTCPServerButton->height() +
-                _checkTCPServerButton->height() +
-                _checkTCPServerButton->height() +
-                _orientationButton->height() +
-                _minimizeButton->height() +
-                _closeButton->height() +
-                space * 5 +
-                m.bottom());
+            h += buttonsSpacing;
+            w = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
+
+        return QSize(m.left() + w + m.right(), m.top() + h + m.bottom());
     }
 
-    void minimizeApp()
+    void minimize()
     {
         Q_Q(MonitoringToolWidget);
 
         q->setWindowState(Qt::WindowMinimized);
     }
-
-    void closeApp()
-    {
-        qApp->exit();
-    }
 };
 
 
-ui::MonitoringToolWidget::MonitoringToolWidget(QWidget *parent)
+ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent)
     : QWidget(parent)
 	, d_ptr(new MonitoringToolWidgetPrivate(this))
 {
@@ -241,25 +220,25 @@ ui::MonitoringToolWidget::MonitoringToolWidget(QWidget *parent)
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-    d->createOrientationButton();
-    d->createMinimizeButton();
-    d->createCloseButton();
-	d->createCheckServerButtons();
+    d->addServers(serversInfo);
+    d->createControlButtons();
 	d->createLayouts();
 
-    connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::changeOrientation);
-    connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimizeApp);
-    connect(d->_closeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::closeApp);
-
-
-    connect(d->_checkTCPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkTCPServer);
-    connect(d->_checkUDPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkUDPServer);
-    connect(d->_checkICMPServerButton, &QPushButton::clicked, this, &MonitoringToolWidget::checkICMPServer);
+    connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::rotate);
+    connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimize);
+    connect(d->_closeButton, &ControlButton::clicked, this, &MonitoringToolWidget::closeApp);
 }
 
-ui::MonitoringToolWidget::~MonitoringToolWidget()
+ui::MonitoringToolWidget::~MonitoringToolWidget() = default;
+
+void ui::MonitoringToolWidget::setServerStatus(ushort serverId, ServerStatus status)
 {
-    qDebug() << "\n==== MonitoringToolWidget: DESTROYED\n";
+    Q_D(MonitoringToolWidget);
+
+    if (!d->_statusWidgets.contains(serverId))
+        return;
+
+    d->_statusWidgets[serverId]->setStatus(status);
 }
 
 QSize ui::MonitoringToolWidget::sizeHint() const
@@ -267,9 +246,4 @@ QSize ui::MonitoringToolWidget::sizeHint() const
     Q_D(const MonitoringToolWidget);
 
     return d->sizeHint();
-}
-
-void ui::MonitoringToolWidget::resizeEvent(QResizeEvent *event)
-{
-    qDebug() << "===== MTWIDGET:RESIZE_EVENT: old size = [" << event->oldSize() << "], new size = [" << event->size() << "]\n";
 }

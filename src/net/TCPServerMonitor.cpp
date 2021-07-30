@@ -23,9 +23,7 @@ public:
     {
     }
 
-    ~TCPServerMonitorPrivate()
-    {
-    }
+    ~TCPServerMonitorPrivate() = default;
 };
 
 TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *parent)

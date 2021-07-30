@@ -2,6 +2,8 @@
 
 #include <QWidget>
 
+#include "core/ServerStatus.h"
+
 namespace ui
 {
     class MonitoringToolWidgetPrivate;
@@ -10,17 +12,15 @@ namespace ui
         Q_OBJECT
 
     public:
-        explicit MonitoringToolWidget(QWidget *parent = nullptr);
+        explicit MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent = nullptr);
         ~MonitoringToolWidget();
+
+        void setServerStatus(ushort serverId, ServerStatus status);
 
         QSize sizeHint() const override;
 
-        virtual void resizeEvent(QResizeEvent *event) override;
-
     signals:
-        void checkTCPServer();
-        void checkUDPServer();
-        void checkICMPServer();
+        void closeApp();
 
     private:
         QScopedPointer<MonitoringToolWidgetPrivate> d_ptr;

@@ -23,9 +23,7 @@ public:
     {
     }
 
-    ~UDPServerMonitorPrivate()
-    {
-    }
+    ~UDPServerMonitorPrivate() = default;
 };
 
 UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObject *parent)

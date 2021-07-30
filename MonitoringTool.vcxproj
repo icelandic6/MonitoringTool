@@ -116,6 +116,7 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="src\net\TCPServerMonitor.cpp" />
+    <ClCompile Include="src\ui\ServerStatusWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\ui\MonitoringToolWidget.h" />
@@ -136,6 +137,7 @@
     <QtMoc Include="src\net\ICMPServerMonitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="src\ui\ServerStatusWidget.h" />
     <QtMoc Include="src\core\MonitoringTool.h" />
     <QtMoc Include="src\core\ServersManager.h" />
     <QtMoc Include="src\core\Server.h" />

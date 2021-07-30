@@ -19,7 +19,7 @@ namespace core
 
         void runCheck();
 
-        uint id() const;
+        ushort id() const;
         QString name() const;
         ServerStatus status() const;
 

@@ -16,9 +16,7 @@ public:
 	{
 	}
 
-	~ServerMonitorPrivate()
-	{
-	}
+	~ServerMonitorPrivate() = default;
 };
 
 // ServerMonitor::ServerMonitor(QHostAddress address, QObject *parent)

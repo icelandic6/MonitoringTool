@@ -11,8 +11,11 @@ namespace ui
         explicit ControlButton(const QString &iconPath, QWidget *parent = nullptr);
         ~ControlButton();
 
+        static int buttonSize();
+
     protected:
         virtual void mouseReleaseEvent(QMouseEvent *event) override;
+        virtual void paintEvent(QPaintEvent *event) override;
 
     signals:
         void clicked();
