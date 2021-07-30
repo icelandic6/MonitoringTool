@@ -79,25 +79,34 @@ core::ServersManager::ServersManager(int frequencySeconds, int sensitivity, QObj
 
 core::ServersManager::~ServersManager() = default;
 
-void core::ServersManager::addTCPServer(const QString &name, const QString &address, int port)
+ushort core::ServersManager::addTCPServer(const QString &name, const QString &address, int port)
 {
     Q_D(ServersManager);
 
-    d->addServer(new Server(name, new TCPServerMonitor(address, port, this), d->_sensitivity));
+    auto server = new Server(name, new TCPServerMonitor(address, port, this), d->_sensitivity);
+    d->addServer(server);
+
+    return server->id();
 }
 
-void core::ServersManager::addUDPServer(const QString &name, const QString &address, int port)
+ushort core::ServersManager::addUDPServer(const QString &name, const QString &address, int port)
 {
     Q_D(ServersManager);
 
-    d->addServer(new Server(name, new UDPServerMonitor(address, port, this), d->_sensitivity));
+    auto server = new Server(name, new UDPServerMonitor(address, port, this), d->_sensitivity);
+    d->addServer(server);
+
+    return server->id();
 }
 
-void core::ServersManager::addICMPServer(const QString &name, const QString &address)
+ushort core::ServersManager::addICMPServer(const QString &name, const QString &address)
 {
     Q_D(ServersManager);
 
-    d->addServer(new Server(name, new ICMPServerMonitor(address, this), d->_sensitivity));
+    auto server = new Server(name, new ICMPServerMonitor(address, this), d->_sensitivity);
+    d->addServer(server);
+
+    return server->id();
 }
 
 // void core::ServersManager::addServerMonitor(ServerMonitor *monitor)

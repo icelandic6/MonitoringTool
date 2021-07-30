@@ -55,6 +55,9 @@
     <ClCompile Include="src\core\ServersManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\ServerStatusWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -90,6 +93,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\core\ServersManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\ui\ServerStatusWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

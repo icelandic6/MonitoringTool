@@ -13,6 +13,7 @@ namespace ui
 
     protected:
         virtual void mouseReleaseEvent(QMouseEvent *event) override;
+        virtual void paintEvent(QPaintEvent *event) override;
 
     signals:
         void clicked();

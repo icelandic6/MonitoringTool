@@ -5,7 +5,7 @@
 #include "net/UDPServerMonitor.h"
 #include "net/ICMPServerMonitor.h"
 
-static uint nextId = 0;
+static ushort nextId = 0;
 
 class core::ServerPrivate : public QObject
 {
@@ -13,7 +13,7 @@ class core::ServerPrivate : public QObject
     Q_DISABLE_COPY(ServerPrivate)
     Server *q_ptr = nullptr;
 
-    uint _id;
+    ushort _id;
     QString _name;
     ServerStatus _status = ServerStatus::Available;
     ServerMonitor* _monitor;
@@ -99,7 +99,7 @@ void core::Server::runCheck()
     d->_monitor->checkServer();
 }
 
-uint core::Server::id() const
+ushort core::Server::id() const
 {
     Q_D(const Server);
 

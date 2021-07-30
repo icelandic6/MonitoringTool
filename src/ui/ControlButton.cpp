@@ -27,3 +27,12 @@ void ui::ControlButton::mouseReleaseEvent(QMouseEvent *event)
 
     emit clicked();
 }
+
+#include <QPainter>
+
+void ui::ControlButton::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.fillRect(rect(), QColor(100, 200, 100, 100));
+    QWidget::paintEvent(event);
+}
