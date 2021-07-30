@@ -4,10 +4,13 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+static int buttonSize = 32;
 
 ui::ControlButton::ControlButton(const QString &iconPath, QWidget *parent)
     : QWidget(parent)
 {
+    setFixedSize(::buttonSize, ::buttonSize);
+
     auto label = new QLabel(this);
     label->setPixmap(QPixmap(iconPath));
 
@@ -20,6 +23,11 @@ ui::ControlButton::ControlButton(const QString &iconPath, QWidget *parent)
 }
 
 ui::ControlButton::~ControlButton() = default;
+
+int ui::ControlButton::buttonSize()
+{
+    return ::buttonSize;
+}
 
 void ui::ControlButton::mouseReleaseEvent(QMouseEvent *event)
 {

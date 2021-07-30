@@ -19,13 +19,8 @@ namespace ui
 
         QSize sizeHint() const override;
 
-    protected:
-        virtual void resizeEvent(QResizeEvent *event) override;
-
     signals:
-        void checkTCPServer();
-        void checkUDPServer();
-        void checkICMPServer();
+        void closeApp();
 
     private:
         QScopedPointer<MonitoringToolWidgetPrivate> d_ptr;

@@ -27,7 +27,7 @@ public:
     {
     }
 
-    ~ServerPrivate() {}
+    ~ServerPrivate() = default;
 
     void handleCheck(bool success)
     {

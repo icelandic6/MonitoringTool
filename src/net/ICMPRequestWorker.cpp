@@ -24,9 +24,7 @@ public:
     {
     }
 
-    ~ICMPRequestWorkerPrivate()
-    {
-    }
+    ~ICMPRequestWorkerPrivate() = default;
 };
 
 ICMPRequestWorker::ICMPRequestWorker(ICMPMessage message, int timeout /*= 1000*/, QObject *parent /*= nullptr*/)

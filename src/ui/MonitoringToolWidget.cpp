@@ -23,9 +23,6 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     ControlButton *_minimizeButton = nullptr;
     QList<ControlButton*> _controlButtons;
 
-    const int _mainMargin = 4;
-    const int _cellsLength = 48;
-
     const int _rowsMax = 5;
 
     QGridLayout *_statusesLayout = nullptr;
@@ -38,9 +35,7 @@ public:
     {
     }
 
-    ~MonitoringToolWidgetPrivate()
-    {
-    }
+    ~MonitoringToolWidgetPrivate() = default;
 
 private:
     ControlButton* createControlButton(const QString &iconPath)
@@ -48,8 +43,6 @@ private:
         Q_Q(MonitoringToolWidget);
 
         auto button = new ControlButton(iconPath, q);
-        button->setFixedSize(32, 32);
-
         _controlButtons.append(button);
         return button;
     }
@@ -61,11 +54,11 @@ private:
         _closeButton = createControlButton(QString(":/MonitoringTool/close_icon.svg"));
     }
 
-    void createServers(const QMap<ushort, QString> &serversInfo)
+    void addServers(const QMap<ushort, QString> &serversInfo)
     {
         Q_Q(MonitoringToolWidget);
 
-        for (auto id : serversInfo.keys())
+        for (const auto id : serversInfo.keys())
             _statusWidgets[id] = new ServerStatusWidget(serversInfo[id], q);
     }
 
@@ -74,29 +67,13 @@ private:
         return _orientation == Qt::Horizontal;
     }
 
-    void removeLayouts()
+    void updateStatusesLayout()
     {
-        if (_statusesLayout)
-            delete _statusesLayout;
-        if (_buttonsLayout)
-            delete _buttonsLayout;
-        if (_mainLayout)
-            delete _mainLayout;
-    }
-
-    void createLayouts()
-    {
-        Q_Q(MonitoringToolWidget);
-
-        _statusesLayout = new QGridLayout();
-        _statusesLayout->setAlignment(Qt::AlignCenter);
-        _statusesLayout->setContentsMargins(QMargins(0, 0, 0, 0));
-        _statusesLayout->setSpacing(0);
+        int rc = 0;
 
         if (_statusWidgets.size() <= _rowsMax)
         {
-            int rc = 0;
-            for (auto sw : _statusWidgets.values())
+            for (const auto &sw : _statusWidgets.values())
             {
                 _statusesLayout->addWidget(sw, horizontal() ? 0 : rc, horizontal() ? rc : 0, 2, 2);
                 rc += 2;
@@ -104,14 +81,13 @@ private:
         }
         else
         {
-            int rc = 0;
             auto evenSize = _statusWidgets.size() % 2 == 0
                 ? _statusWidgets.size() / 2
                 : _statusWidgets.size() / 2 + 1;
             int r = 0;
             int c = 0;
 
-            for (auto sw : _statusWidgets.values())
+            for (const auto &sw : _statusWidgets.values())
             {
                 _statusesLayout->addWidget(sw, r, c, 2, 2);
                 rc++;
@@ -132,6 +108,17 @@ private:
                 }
             }
         }
+    }
+
+    void createLayouts()
+    {
+        Q_Q(MonitoringToolWidget);
+
+        _statusesLayout = new QGridLayout();
+        _statusesLayout->setAlignment(Qt::AlignCenter);
+        _statusesLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+        _statusesLayout->setSpacing(0);
+        updateStatusesLayout();
 
         _buttonsLayout = new QGridLayout();
         _buttonsLayout->setAlignment(Qt::AlignCenter);
@@ -139,19 +126,14 @@ private:
         _buttonsLayout->setSpacing(0);
 
         int i = 0;
-        for (auto button : _controlButtons)
+        for (const auto &button : _controlButtons)
         {
             _buttonsLayout->addWidget(button, horizontal() ? 0 : i, horizontal() ? i : 0);
             i++;
         }
 
         _mainLayout = new QGridLayout();
-        _mainLayout->setContentsMargins(QMargins(
-            horizontal() ? _mainMargin : 0,
-            horizontal() ? 0 : _mainMargin,
-            horizontal() ? _mainMargin : 0,
-            horizontal() ? 0 : _mainMargin
-        ));
+        _mainLayout->setContentsMargins(QMargins(4, 4, 4, 4));
         _mainLayout->setSpacing(0);
         _mainLayout->addLayout(_statusesLayout, 0, 0);
         _mainLayout->addLayout(_buttonsLayout, horizontal() ? 0 : 1, horizontal() ? 1 : 0);
@@ -160,7 +142,17 @@ private:
         q->setFixedSize(q->sizeHint());
     }
 
-    void changeOrientation()
+    void removeLayouts()
+    {
+        if (_statusesLayout)
+            delete _statusesLayout;
+        if (_buttonsLayout)
+            delete _buttonsLayout;
+        if (_mainLayout)
+            delete _mainLayout;
+    }
+
+    void rotate()
     {
         Q_Q(MonitoringToolWidget);
 
@@ -168,13 +160,6 @@ private:
 
         removeLayouts();
         createLayouts();
-    }
-
-    void addServerStatusWidget(ushort id, const QString &name)
-    {
-        Q_Q(MonitoringToolWidget);
-
-        _statusWidgets[id] = new ServerStatusWidget(name, q);
     }
 
     QSize sizeHint() const
@@ -185,55 +170,44 @@ private:
         auto m = q->layout()->contentsMargins();
         int w = 0, h = 0;
         int evenSize = _statusWidgets.size() + (_statusWidgets.size() % 2 == 0 ? 0 : 1);
+        
+        int cellsSize = _statusWidgets.size() <= _rowsMax
+            ? (_statusWidgets.size() * ServerStatusWidget::cellSize())
+            : (evenSize / 2) * ServerStatusWidget::cellSize();
+        int cellsSpacing = spacing * (_statusWidgets.size() <= _rowsMax
+                                     ? (_statusWidgets.size() - 1)
+                                     : (evenSize / 2 - 1));
+
+        int buttonsLength = _controlButtons.size() * ControlButton::buttonSize();
+        int buttonsSpacing = spacing * (_controlButtons.size() - 1);
 
         if (horizontal())
         {
-            w = _statusWidgets.size() <= _rowsMax
-                ? (_statusWidgets.size() * ServerStatusWidget::sizeSize())
-                : (evenSize / 2) * ServerStatusWidget::sizeSize();
+            w = cellsSize;
+            w += cellsSpacing;
+            w += buttonsLength;
 
-            w += spacing * (_statusWidgets.size() <= _rowsMax
-                           ? (_statusWidgets.size() - 1)
-                           : (evenSize / 2 - 1));
-
-            for (auto button : _controlButtons)
-                w += button->width();
-
-            w += spacing * (_controlButtons.length() - 1);
-            h = _cellsLength * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
-
-            return QSize(m.left() + w + m.right(), h);
+            w += buttonsSpacing;
+            h = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
         else
         {
-            h = _statusWidgets.size() <= _rowsMax
-                ? (_statusWidgets.size() * ServerStatusWidget::sizeSize())
-                : (evenSize / 2) * ServerStatusWidget::sizeSize();
+            h = cellsSize;
+            h += cellsSpacing;
+            h += buttonsLength;
 
-            h += spacing * (_statusWidgets.size() <= _rowsMax
-                ? (_statusWidgets.size() - 1)
-                : (evenSize / 2 - 1));
-
-            for (auto button : _controlButtons)
-                h += button->height();
-
-            h += spacing * (_controlButtons.length() - 1);
-            w = _cellsLength * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
-
-            return QSize(w, m.top() + h + m.bottom());
+            h += buttonsSpacing;
+            w = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
+
+        return QSize(m.left() + w + m.right(), m.top() + h + m.bottom());
     }
 
-    void minimizeApp()
+    void minimize()
     {
         Q_Q(MonitoringToolWidget);
 
         q->setWindowState(Qt::WindowMinimized);
-    }
-
-    void closeApp()
-    {
-        qApp->exit();
     }
 };
 
@@ -246,21 +220,16 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-    d->createServers(serversInfo);
+    d->addServers(serversInfo);
     d->createControlButtons();
 	d->createLayouts();
 
-    connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::changeOrientation);
-    connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimizeApp);
-    connect(d->_closeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::closeApp);
-
+    connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::rotate);
+    connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimize);
+    connect(d->_closeButton, &ControlButton::clicked, this, &MonitoringToolWidget::closeApp);
 }
 
-ui::MonitoringToolWidget::~MonitoringToolWidget()
-{
-    //TODO: check if destructor called on app quit
-    qDebug() << "\n==== MonitoringToolWidget: DESTROYED\n";
-}
+ui::MonitoringToolWidget::~MonitoringToolWidget() = default;
 
 void ui::MonitoringToolWidget::setServerStatus(ushort serverId, ServerStatus status)
 {
@@ -272,21 +241,9 @@ void ui::MonitoringToolWidget::setServerStatus(ushort serverId, ServerStatus sta
     d->_statusWidgets[serverId]->setStatus(status);
 }
 
-// void ui::MonitoringToolWidget::addServerStatusWidget(ushort id, const QString &name)
-// {
-//     Q_D(MonitoringToolWidget);
-// 
-//     d->addServerStatusWidget(id, name);
-// }
-
 QSize ui::MonitoringToolWidget::sizeHint() const
 {
     Q_D(const MonitoringToolWidget);
 
     return d->sizeHint();
-}
-
-void ui::MonitoringToolWidget::resizeEvent(QResizeEvent *event)
-{
-    qDebug() << "===== MTWIDGET:RESIZE_EVENT: old size = [" << event->oldSize() << "], new size = [" << event->size() << "]\n";
 }

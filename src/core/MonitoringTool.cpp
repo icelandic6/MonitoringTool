@@ -30,9 +30,7 @@ public:
     {
     }
 
-    ~MonitoringToolPrivate()
-    {
-    }
+    ~MonitoringToolPrivate() = default;
 
 private:
     void createServerMonitors()
@@ -105,10 +103,30 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     id = d->_serversManager->addICMPServer(name, valid_addr);
     serversInfo[id] = name;
 
+    name = "ICMP Host 2";
+    id = d->_serversManager->addICMPServer(name, valid_addr);
+    serversInfo[id] = name;
+
+    name = "ICMP Host 3";
+    id = d->_serversManager->addICMPServer(name, valid_addr);
+    serversInfo[id] = name;
+
+    name = "ICMP Host 4";
+    id = d->_serversManager->addICMPServer(name, valid_addr);
+    serversInfo[id] = name;
+
+//     name = "ICMP Host 5";
+//     id = d->_serversManager->addICMPServer(name, valid_addr);
+//     serversInfo[id] = name;
+
     d->_mtoolWidget = new ui::MonitoringToolWidget(serversInfo);
     d->_mtoolWidget->show();
 
 
+    connect(d->_mtoolWidget, &ui::MonitoringToolWidget::closeApp, this, [this]()
+    {
+        qApp->exit();
+    });
 
     connect(d->_serversManager, &ServersManager::serverStatusUpdated, this, [this](ushort serverId, ServerStatus status)
     {
@@ -123,4 +141,10 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     });
 }
 
-core::MonitoringTool::~MonitoringTool() = default;
+core::MonitoringTool::~MonitoringTool()
+{
+    Q_D(MonitoringTool);
+
+    if (d->_mtoolWidget)
+        delete d->_mtoolWidget;
+}

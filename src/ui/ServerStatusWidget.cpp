@@ -4,7 +4,7 @@
 #include <QPainter>
 #include <QDebug>
 
-static int sizeSize = 40;
+static int cellSize = 40;
 
 class ui::ServerStatusWidgetPrivate : public QObject
 {
@@ -12,11 +12,10 @@ class ui::ServerStatusWidgetPrivate : public QObject
     Q_DISABLE_COPY(ServerStatusWidgetPrivate)
     ServerStatusWidget *q_ptr = nullptr;
 
+    QString _name;
+
     QColor _color = QColor(100, 200, 100);
     qreal _radius = 11.5;
-
-
-    QString _name;
 
 public:
     explicit ServerStatusWidgetPrivate(ServerStatusWidget *q)
@@ -24,9 +23,7 @@ public:
     {
     }
 
-    ~ServerStatusWidgetPrivate()
-    {
-    }
+    ~ServerStatusWidgetPrivate() = default;
 };
 
 ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
@@ -35,7 +32,7 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 {
     Q_D(ServerStatusWidget);
 
-    setFixedSize(::sizeSize, ::sizeSize);
+    setFixedSize(::cellSize, ::cellSize);
 
     d->_name = name;
 
@@ -75,7 +72,7 @@ void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
 }
 
-int ui::ServerStatusWidget::sizeSize()
+int ui::ServerStatusWidget::cellSize()
 {
-    return ::sizeSize;
+    return ::cellSize;
 }

@@ -28,7 +28,7 @@ public:
     {
     }
 
-    ~ServersManagerPrivate() {}
+    ~ServersManagerPrivate() = default;
 
     void runServersCheck()
     {
