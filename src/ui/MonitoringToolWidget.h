@@ -19,6 +19,9 @@ namespace ui
 
         QSize sizeHint() const override;
 
+    protected:
+        virtual void paintEvent(QPaintEvent *event) override;
+
     signals:
         void closeApp();
 

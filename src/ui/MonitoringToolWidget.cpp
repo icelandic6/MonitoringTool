@@ -7,6 +7,7 @@
 #include <QGridLayout>
 #include <QHostAddress>
 #include <QResizeEvent>
+#include <QPainter>
 #include <QApplication>
 
 class ui::MonitoringToolWidgetPrivate : public QObject
@@ -214,15 +215,16 @@ private:
 
 ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent)
     : QWidget(parent)
-	, d_ptr(new MonitoringToolWidgetPrivate(this))
+    , d_ptr(new MonitoringToolWidgetPrivate(this))
 {
-	Q_D(MonitoringToolWidget);
+    Q_D(MonitoringToolWidget);
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_TranslucentBackground);
 
     d->addServers(serversInfo);
     d->createControlButtons();
-	d->createLayouts();
+    d->createLayouts();
 
     connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::rotate);
     connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimize);
@@ -246,4 +248,20 @@ QSize ui::MonitoringToolWidget::sizeHint() const
     Q_D(const MonitoringToolWidget);
 
     return d->sizeHint();
+}
+
+void ui::MonitoringToolWidget::paintEvent(QPaintEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setBrush(Qt::white);
+    painter.setPen(Qt::transparent);
+
+    QPainterPath path;
+    path.addRoundedRect(rect(), 6.0, 6.0);
+    painter.drawPath(path);
+
+    QWidget::paintEvent(event);
 }
