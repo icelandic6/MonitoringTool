@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QSystemTrayIcon>
 
 #include "core/ServerStatus.h"
 
@@ -15,7 +16,8 @@ namespace ui
         MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent = nullptr);
         ~MonitoringToolWidget();
 
-        void setServerStatus(ushort serverId, ServerStatus status);
+        void setServerStatus(ushort serverId, core::ServerStatus status);
+        void setTrayServerStatus(const QString &name, core::ServerStatus status);
 
         QSize sizeHint() const override;
 

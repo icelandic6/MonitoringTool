@@ -16,11 +16,12 @@ class core::ServersManagerPrivate : public QObject
     ServersManager *q_ptr = nullptr;
 
     QList<Server*> _servers;
+    Server *_worstServer = nullptr;
 
     QTimer _timer;
 
-    int _frequency = 8000;
-    int _sensitivity = 3;
+    int _frequency = 5000;
+    int _sensitivity = 2;
 
 public:
     explicit ServersManagerPrivate(ServersManager *q)
@@ -32,16 +33,8 @@ public:
 
     void runServersCheck()
     {
-        qDebug() << "\n======= ServerMonitorsManager:runServersCheck: started ========\n";
-
         for (auto const& server : _servers)
-        {
-            qDebug() << "\n======= ServerMonitorsManager: check " 
-                << server->name()
-                << "\n";
             server->runCheck();
-
-        }
     }
 
     void addServer(Server *server)
@@ -53,9 +46,39 @@ public:
             Q_Q(ServersManager);
 
             auto server = static_cast<Server*>(sender());
+            checkIfWorstServer(server);
 
             emit q->serverStatusUpdated(server->id(), server->status());
         });
+
+        if (_worstServer == nullptr)
+            setWorstServer(server);
+    }
+
+    void setWorstServer(Server *server)
+    {
+        Q_Q(ServersManager);
+
+        qDebug() << "\n**** NEW WORST SERVER: [" << server->name() << "|" << (server->status() == ServerStatus::Available ? "AVAILABLE" : (server->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]\n\n";
+
+        _worstServer = server;
+        emit q->worstServerUpdated(_worstServer->name(), _worstServer->status());
+    }
+
+    void checkIfWorstServer(Server *server)
+    {
+        if (server->id() == _worstServer->id())
+        {
+            for (auto &s : _servers)
+                if (s->status() < _worstServer->status())
+                {
+                    setWorstServer(s);
+                    return;
+                }
+            setWorstServer(server);
+        }
+        else if (server->status() < _worstServer->status())
+            setWorstServer(server);
     }
 };
 
@@ -107,46 +130,4 @@ ushort core::ServersManager::addICMPServer(const QString &name, const QString &a
     d->addServer(server);
 
     return server->id();
-}
-
-// void core::ServersManager::addServerMonitor(ServerMonitor *monitor)
-// {
-//     Q_D(ServersManager);
-// 
-//     d->_servers.append(monitor);
-//     connect(monitor, &ServerMonitor::finished, d, &ServersManagerPrivate::onMonitorFinished);
-// }
-// 
-// void core::ServersManager::addTCPServerMonitor(const QString &name, const QString &hostAddress, int port)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new TCPServerMonitor(name, hostAddress, port, this));
-// }
-// 
-// void core::ServersManager::addUDPServerMonitor(const QString &name, const QString &hostAddress, int port)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new UDPServerMonitor(name, hostAddress, port, this));
-// }
-// 
-// void core::ServersManager::addICMPServerMonitor(const QString &name, const QString &hostAddress)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new ICMPServerMonitor(name, hostAddress, this));
-// }
-
-void core::ServersManager::setSensitivity(int sensitivity)
-{
-    Q_D(ServersManager);
-
-}
-
-int core::ServersManager::sensitivity() const
-{
-    Q_D(const ServersManager);
-
-    return d->_sensitivity;
 }

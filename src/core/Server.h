@@ -22,6 +22,7 @@ namespace core
         ushort id() const;
         QString name() const;
         ServerStatus status() const;
+        ServerStatus prevStatus() const;
 
     signals:
         void statusChanged();

@@ -19,11 +19,9 @@ namespace core
         ushort addUDPServer(const QString &name, const QString &address, int port);
         ushort addICMPServer(const QString &name, const QString &address);
 
-        void setSensitivity(int sensitivity);
-        int sensitivity() const;
-
     signals:
         void serverStatusUpdated(ushort serverId, ServerStatus status);
+        void worstServerUpdated(const QString &name, ServerStatus status);
 
     private:
         QScopedPointer<ServersManagerPrivate> d_ptr;

@@ -16,7 +16,7 @@ class core::MonitoringToolPrivate : public QObject
     Q_DISABLE_COPY(MonitoringToolPrivate)
     MonitoringTool *q_ptr = nullptr;
 
-    ui::MonitoringToolWidget *_mtoolWidget = nullptr;
+    ui::MonitoringToolWidget *_monitoringWidget = nullptr;
 
     ServerMonitor *_tcpServerMonitor = nullptr;
     ServerMonitor *_udpServerMonitor = nullptr;
@@ -33,29 +33,6 @@ public:
     ~MonitoringToolPrivate() = default;
 
 private:
-    void createServerMonitors()
-    {
-        Q_Q(MonitoringTool);
-
-//         QString addr("google.com");
-//         QString addr("127.0.0.1");
-//         QString valid_addr("64.233.165.139");
-//         QString invalid_addr("69.69.69.69");
-// //         QString addr("http://example.com");
-// 
-//         auto serverId = _serversManager->addTCPServer("TCP Host", invalid_addr, 80);
-
-//         _serversManager->addUDPServer("UDP Host", valid_addr, 80);
-//         _serversManager->addICMPServer("ICMP Host", valid_addr);
-
-//         connect(_serversManager, &ServersManager::serverStatusUpdated, this, [this](ushort serverId, ServerStatus status)
-//         {
-//             QString s = (status == ServerStatus::Available) ? "AVAILABLE" : ((status == ServerStatus::Unstable) ? "UNSTABLE" : "FAILED");
-// 
-//             qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
-//         });
-    }
-
     void createMonitorsManager()
     {
         _serversManager = new ServersManager(10000, 3, this);
@@ -64,12 +41,17 @@ private:
 public:
     void minimizeApp()
     {
-        _mtoolWidget->setWindowState(Qt::WindowMinimized);
+        _monitoringWidget->setWindowState(Qt::WindowMinimized);
     }
 
     void closeApp()
     {
         qApp->exit();
+    }
+
+    void updateTrayIcon(const QString &name, core::ServerStatus status)
+    {
+        _monitoringWidget->setTrayServerStatus(name, status);
     }
 };
 
@@ -81,7 +63,6 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     Q_D(MonitoringTool);
 
     d->createMonitorsManager();
-    d->createServerMonitors();
 
 //     QString addr("google.com");
 //     QString addr("127.0.0.1");
@@ -91,8 +72,12 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
 
     QMap<ushort, QString> serversInfo;
 
-    QString name = "TCP Host";
-    ushort id = d->_serversManager->addTCPServer(name, invalid_addr, 80);
+    QString name = "TCP Host 1";
+    ushort id = d->_serversManager->addTCPServer(name, valid_addr, 80);
+    serversInfo[id] = name;
+
+    name = "TCP Host 2";
+    id = d->_serversManager->addTCPServer(name, invalid_addr, 80);
     serversInfo[id] = name;
 
     name = "UDP Host";
@@ -111,19 +96,19 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     id = d->_serversManager->addICMPServer(name, valid_addr);
     serversInfo[id] = name;
 
-    name = "ICMP Host 4";
-    id = d->_serversManager->addICMPServer(name, valid_addr);
-    serversInfo[id] = name;
+//     name = "ICMP Host 4";
+//     id = d->_serversManager->addICMPServer(name, valid_addr);
+//     serversInfo[id] = name;
 
 //     name = "ICMP Host 5";
 //     id = d->_serversManager->addICMPServer(name, valid_addr);
 //     serversInfo[id] = name;
 
-    d->_mtoolWidget = new ui::MonitoringToolWidget(serversInfo);
-    d->_mtoolWidget->show();
+    d->_monitoringWidget = new ui::MonitoringToolWidget(serversInfo);
+    d->_monitoringWidget->show();
+    d->_monitoringWidget->setTrayServerStatus(name, core::ServerStatus::Available);
 
-
-    connect(d->_mtoolWidget, &ui::MonitoringToolWidget::closeApp, this, [this]()
+    connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, this, [this]()
     {
         qApp->exit();
     });
@@ -133,18 +118,20 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
         Q_D(MonitoringTool);
 
         //TODO: remove this lambda after debugging
-        d->_mtoolWidget->setServerStatus(serverId, status);
+        d->_monitoringWidget->setServerStatus(serverId, status);
 
         QString s = (status == ServerStatus::Available) ? "AVAILABLE" : ((status == ServerStatus::Unstable) ? "UNSTABLE" : "FAILED");
 
         qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
     });
+    connect(d->_serversManager, &ServersManager::worstServerUpdated,
+            d, &MonitoringToolPrivate::updateTrayIcon);
 }
 
 core::MonitoringTool::~MonitoringTool()
 {
     Q_D(MonitoringTool);
 
-    if (d->_mtoolWidget)
-        delete d->_mtoolWidget;
+    if (d->_monitoringWidget)
+        delete d->_monitoringWidget;
 }
