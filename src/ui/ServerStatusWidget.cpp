@@ -41,15 +41,15 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 
 ui::ServerStatusWidget::~ServerStatusWidget() = default;
 
-void ui::ServerStatusWidget::setStatus(ServerStatus status)
+void ui::ServerStatusWidget::setStatus(core::ServerStatus status)
 {
     Q_D(ServerStatusWidget);
 
-    if (status == ServerStatus::Available)
+    if (status == core::ServerStatus::Available)
         d->_color = QColor(100, 200, 100);
-    else if (status == ServerStatus::Unstable)
+    else if (status == core::ServerStatus::Unstable)
         d->_color = QColor(200, 200, 100);
-    else if (status == ServerStatus::Failed)
+    else if (status == core::ServerStatus::Failed)
         d->_color = QColor(200, 100, 100);
 
     update();
@@ -61,8 +61,6 @@ void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
-
     painter.setBrush(d->_color);
     painter.setPen(d->_color);
 

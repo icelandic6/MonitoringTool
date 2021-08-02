@@ -32,6 +32,8 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     QGridLayout *_buttonsLayout = nullptr;
     QGridLayout *_mainLayout = nullptr;
 
+    QSystemTrayIcon *_trayIcon = nullptr;
+
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
         : q_ptr(q)
@@ -63,6 +65,11 @@ private:
 
         _separator = new Separator(q);
         updateSeparator();
+    }
+
+    void createSystemTrayIcon()
+    {
+        _trayIcon = new QSystemTrayIcon(this);
     }
 
     void addServers(const QMap<ushort, QString> &serversInfo)
@@ -165,6 +172,16 @@ private:
             delete _mainLayout;
     }
 
+    void updateSeparator()
+    {
+        auto single = _statusWidgets.size() < _rowsMax;
+        _separator->setFixedSize(
+            horizontal()
+            ? QSize(1, single ? 40 : 64)
+            : QSize(single ? 40 : 64, 1));
+    }
+
+public:
     void rotate()
     {
         Q_Q(MonitoringToolWidget);
@@ -174,15 +191,6 @@ private:
         removeLayouts();
         updateSeparator();
         createLayouts();
-    }
-
-    void updateSeparator()
-    {
-        auto single = _statusWidgets.size() < _rowsMax;
-        _separator->setFixedSize(
-            horizontal()
-            ? QSize(1, single ? 40 : 64)
-            : QSize(single ? 40 : 64, 1));
     }
 
     QSize sizeHint() const
@@ -226,6 +234,40 @@ private:
 
         q->setWindowState(Qt::WindowMinimized);
     }
+
+    void trayIconActivated(QSystemTrayIcon::ActivationReason reason)
+    {
+        Q_Q(MonitoringToolWidget);
+        q->show();
+    }
+
+    void setTrayServer(const QString &name, core::ServerStatus status)
+    {
+        Q_Q(MonitoringToolWidget);
+
+        QColor color;
+        if (status == core::ServerStatus::Available)
+            color = QColor(100, 200, 100);
+        else if (status == core::ServerStatus::Unstable)
+            color = QColor(200, 200, 100);
+        else if (status == core::ServerStatus::Failed)
+            color = QColor(200, 100, 100);
+
+        QPixmap trayPixmap(16, 16);
+        trayPixmap.fill(Qt::transparent);
+
+        QPainter painter(&trayPixmap);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(color);
+        painter.setPen(color);
+        painter.drawEllipse(QPointF(trayPixmap.width() / 2, trayPixmap.height() / 2), 7, 7);
+
+        _trayIcon->setIcon(QIcon(trayPixmap));
+        _trayIcon->setToolTip(name);
+
+        if (!_trayIcon->isVisible())
+            _trayIcon->show();
+    }
 };
 
 
@@ -242,15 +284,17 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
     d->createSeparator();
     d->createControlButtons();
     d->createLayouts();
+    d->createSystemTrayIcon();
 
     connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::rotate);
     connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimize);
     connect(d->_closeButton, &ControlButton::clicked, this, &MonitoringToolWidget::closeApp);
+    connect(d->_trayIcon, &QSystemTrayIcon::activated, d, &MonitoringToolWidgetPrivate::trayIconActivated);
 }
 
 ui::MonitoringToolWidget::~MonitoringToolWidget() = default;
 
-void ui::MonitoringToolWidget::setServerStatus(ushort serverId, ServerStatus status)
+void ui::MonitoringToolWidget::setServerStatus(ushort serverId, core::ServerStatus status)
 {
     Q_D(MonitoringToolWidget);
 
@@ -258,6 +302,13 @@ void ui::MonitoringToolWidget::setServerStatus(ushort serverId, ServerStatus sta
         return;
 
     d->_statusWidgets[serverId]->setStatus(status);
+}
+
+void ui::MonitoringToolWidget::setTrayServerStatus(const QString &name, core::ServerStatus status)
+{
+    Q_D(MonitoringToolWidget);
+
+    d->setTrayServer(name, status);
 }
 
 QSize ui::MonitoringToolWidget::sizeHint() const

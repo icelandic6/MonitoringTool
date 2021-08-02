@@ -16,11 +16,12 @@ class core::ServersManagerPrivate : public QObject
     ServersManager *q_ptr = nullptr;
 
     QList<Server*> _servers;
+    Server *_leastAvailableServer = nullptr;
 
     QTimer _timer;
 
-    int _frequency = 8000;
-    int _sensitivity = 3;
+    int _frequency = 5000;
+    int _sensitivity = 2;
 
 public:
     explicit ServersManagerPrivate(ServersManager *q)
@@ -32,16 +33,8 @@ public:
 
     void runServersCheck()
     {
-        qDebug() << "\n======= ServerMonitorsManager:runServersCheck: started ========\n";
-
         for (auto const& server : _servers)
-        {
-            qDebug() << "\n======= ServerMonitorsManager: check " 
-                << server->name()
-                << "\n";
             server->runCheck();
-
-        }
     }
 
     void addServer(Server *server)
@@ -54,8 +47,46 @@ public:
 
             auto server = static_cast<Server*>(sender());
 
+            checkIfLeastAvailable(server);
+
             emit q->serverStatusUpdated(server->id(), server->status());
         });
+
+        if (_leastAvailableServer == nullptr)
+            setLeastAvailableServer(server);
+    }
+
+    void setLeastAvailableServer(Server *server)
+    {
+        Q_Q(ServersManager);
+
+        qDebug() << "\n**** NEW LEAST AVAILABLE SERVER: [" << server->name() << "|" << (server->status() == ServerStatus::Available ? "AVAILABLE" : (server->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]\n\n";
+
+        _leastAvailableServer = server;
+        emit q->leastAvailableServerUpdated(
+            _leastAvailableServer->name(),
+            _leastAvailableServer->status());
+    }
+
+    void checkIfLeastAvailable(Server *server)
+    {
+        qDebug() << "\n**** "
+            << "[" << _leastAvailableServer->name() << "|" << (_leastAvailableServer->status() == ServerStatus::Available ? "AVAILABLE" : (_leastAvailableServer->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]"
+            << " VS "
+            << "[" << server->name() << "|" << (server->status() == ServerStatus::Available ? "AVAILABLE" : (server->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]\n";
+
+        if (server->id() == _leastAvailableServer->id())
+        {
+            for (auto &s : _servers)
+                if (s->status() < _leastAvailableServer->status())
+                {
+                    setLeastAvailableServer(s);
+                    return;
+                }
+            setLeastAvailableServer(server);
+        }
+        else if (server->status() < _leastAvailableServer->status())
+            setLeastAvailableServer(server);
     }
 };
 
@@ -109,44 +140,21 @@ ushort core::ServersManager::addICMPServer(const QString &name, const QString &a
     return server->id();
 }
 
-// void core::ServersManager::addServerMonitor(ServerMonitor *monitor)
+// QString core::ServersManager::serverNameById(ushort id) const
 // {
-//     Q_D(ServersManager);
+//     Q_D(const ServersManager);
 // 
-//     d->_servers.append(monitor);
-//     connect(monitor, &ServerMonitor::finished, d, &ServersManagerPrivate::onMonitorFinished);
-// }
+//     auto s = std::find(d->_servers.begin(), d->_servers.end(), [id](Server *s)
+//     {
+//         return s->id() == id;
+//     });
 // 
-// void core::ServersManager::addTCPServerMonitor(const QString &name, const QString &hostAddress, int port)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new TCPServerMonitor(name, hostAddress, port, this));
-// }
-// 
-// void core::ServersManager::addUDPServerMonitor(const QString &name, const QString &hostAddress, int port)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new UDPServerMonitor(name, hostAddress, port, this));
-// }
-// 
-// void core::ServersManager::addICMPServerMonitor(const QString &name, const QString &hostAddress)
-// {
-//     Q_D(ServersManager);
-// 
-//     addServerMonitor(new ICMPServerMonitor(name, hostAddress, this));
+//     return (*s)->name();
 // }
 
-void core::ServersManager::setSensitivity(int sensitivity)
-{
-    Q_D(ServersManager);
-
-}
-
-int core::ServersManager::sensitivity() const
+QPair<ushort, core::ServerStatus> core::ServersManager::leastAvailableServer() const
 {
     Q_D(const ServersManager);
 
-    return d->_sensitivity;
+    return QPair<ushort, core::ServerStatus>(d->_leastAvailableServer->id(), d->_leastAvailableServer->status());
 }
