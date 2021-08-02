@@ -16,6 +16,7 @@ class core::ServerPrivate : public QObject
     ushort _id;
     QString _name;
     ServerStatus _status = ServerStatus::Available;
+    ServerStatus _prevStatus = ServerStatus::Available;
     ServerMonitor* _monitor;
 
     short _cur = 0;
@@ -31,6 +32,8 @@ public:
 
     void handleCheck(bool success)
     {
+        qDebug() << QString("==== Server check [%1]: %2").arg(_name).arg(success);
+
         if ((success && _status == ServerStatus::Available) ||
             (!success && _status == ServerStatus::Failed))
         {
@@ -56,9 +59,15 @@ public:
         Q_Q(Server);
 
         if (_status == ServerStatus::Unstable)
+        {
+            _prevStatus = _status;
             _status = ServerStatus::Available;
+        }
         else if (_status == ServerStatus::Failed)
+        {
+            _prevStatus = _status;
             _status = ServerStatus::Unstable;
+        }
 
         emit q->statusChanged();
     }
@@ -68,9 +77,15 @@ public:
         Q_Q(Server);
 
         if (_status == ServerStatus::Unstable)
+        {
+            _prevStatus = _status;
             _status = ServerStatus::Failed;
+        }
         else if (_status == ServerStatus::Available)
+        {
+            _prevStatus = _status;
             _status = ServerStatus::Unstable;
+        }
 
         emit q->statusChanged();
     }
@@ -113,9 +128,16 @@ QString core::Server::name() const
     return d->_name;
 }
 
-ServerStatus core::Server::status() const
+core::ServerStatus core::Server::status() const
 {
     Q_D(const Server);
 
     return d->_status;
+}
+
+core::ServerStatus core::Server::prevStatus() const
+{
+    Q_D(const Server);
+
+    return d->_prevStatus;
 }
