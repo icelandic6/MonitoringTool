@@ -233,12 +233,14 @@ public:
         Q_Q(MonitoringToolWidget);
 
         q->setWindowState(Qt::WindowMinimized);
+        q->hide();
     }
 
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason)
     {
         Q_Q(MonitoringToolWidget);
         q->show();
+        q->setWindowState(Qt::WindowActive);
     }
 
     void setTrayServer(const QString &name, core::ServerStatus status)
