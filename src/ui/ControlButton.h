@@ -8,7 +8,7 @@ namespace ui
     {
         Q_OBJECT
     public:
-        explicit ControlButton(const QString &iconPath, QWidget *parent = nullptr);
+        ControlButton(const QString &iconPath, QWidget *parent = nullptr);
         ~ControlButton();
 
         static int buttonSize();

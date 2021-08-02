@@ -1,12 +1,13 @@
 #include "MonitoringToolWidget.h"
 #include "ServerStatusWidget.h"
-
-#include "ui/ControlButton.h"
+#include "ControlButton.h"
+#include "Separator.h"
 
 #include <QPushButton>
 #include <QGridLayout>
 #include <QHostAddress>
 #include <QResizeEvent>
+#include <QPainter>
 #include <QApplication>
 
 class ui::MonitoringToolWidgetPrivate : public QObject
@@ -16,6 +17,8 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     MonitoringToolWidget *q_ptr = nullptr;
 
     QMap<ushort, ServerStatusWidget*> _statusWidgets;
+
+    Separator *_separator = nullptr;
 
     Qt::Orientation _orientation = Qt::Horizontal;
     ControlButton *_orientationButton = nullptr;
@@ -52,6 +55,14 @@ private:
         _orientationButton = createControlButton(QString(":/MonitoringTool/orientation_icon.svg"));
         _minimizeButton = createControlButton(QString(":/MonitoringTool/minimize_icon.svg"));
         _closeButton = createControlButton(QString(":/MonitoringTool/close_icon.svg"));
+    }
+
+    void createSeparator()
+    {
+        Q_Q(MonitoringToolWidget);
+
+        _separator = new Separator(q);
+        updateSeparator();
     }
 
     void addServers(const QMap<ushort, QString> &serversInfo)
@@ -134,9 +145,11 @@ private:
 
         _mainLayout = new QGridLayout();
         _mainLayout->setContentsMargins(QMargins(4, 4, 4, 4));
+        _mainLayout->setAlignment(Qt::AlignCenter);
         _mainLayout->setSpacing(0);
         _mainLayout->addLayout(_statusesLayout, 0, 0);
-        _mainLayout->addLayout(_buttonsLayout, horizontal() ? 0 : 1, horizontal() ? 1 : 0);
+        _mainLayout->addWidget(_separator, horizontal() ? 0 : 1, horizontal() ? 1 : 0, Qt::AlignCenter);
+        _mainLayout->addLayout(_buttonsLayout, horizontal() ? 0 : 2, horizontal() ? 2 : 0);
 
         q->setLayout(_mainLayout);
         q->setFixedSize(q->sizeHint());
@@ -159,7 +172,17 @@ private:
         _orientation = (_orientation == Qt::Horizontal) ? Qt::Vertical : Qt::Horizontal;
 
         removeLayouts();
+        updateSeparator();
         createLayouts();
+    }
+
+    void updateSeparator()
+    {
+        auto single = _statusWidgets.size() < _rowsMax;
+        _separator->setFixedSize(
+            horizontal()
+            ? QSize(1, single ? 40 : 64)
+            : QSize(single ? 40 : 64, 1));
     }
 
     QSize sizeHint() const
@@ -180,23 +203,17 @@ private:
 
         int buttonsLength = _controlButtons.size() * ControlButton::buttonSize();
         int buttonsSpacing = spacing * (_controlButtons.size() - 1);
+        int separatorLength = spacing * 2 + (horizontal() ? _separator->width() : _separator->height());
+        int wholeLength = cellsSize + cellsSpacing + separatorLength + buttonsLength + buttonsSpacing;
 
         if (horizontal())
         {
-            w = cellsSize;
-            w += cellsSpacing;
-            w += buttonsLength;
-
-            w += buttonsSpacing;
+            w = wholeLength;
             h = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
         else
         {
-            h = cellsSize;
-            h += cellsSpacing;
-            h += buttonsLength;
-
-            h += buttonsSpacing;
+            h = wholeLength;
             w = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
         }
 
@@ -214,15 +231,17 @@ private:
 
 ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent)
     : QWidget(parent)
-	, d_ptr(new MonitoringToolWidgetPrivate(this))
+    , d_ptr(new MonitoringToolWidgetPrivate(this))
 {
-	Q_D(MonitoringToolWidget);
+    Q_D(MonitoringToolWidget);
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_TranslucentBackground);
 
     d->addServers(serversInfo);
+    d->createSeparator();
     d->createControlButtons();
-	d->createLayouts();
+    d->createLayouts();
 
     connect(d->_orientationButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::rotate);
     connect(d->_minimizeButton, &ControlButton::clicked, d, &MonitoringToolWidgetPrivate::minimize);
@@ -246,4 +265,20 @@ QSize ui::MonitoringToolWidget::sizeHint() const
     Q_D(const MonitoringToolWidget);
 
     return d->sizeHint();
+}
+
+void ui::MonitoringToolWidget::paintEvent(QPaintEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setBrush(Qt::white);
+    painter.setPen(Qt::transparent);
+
+    QPainterPath path;
+    path.addRoundedRect(rect(), 6.0, 6.0);
+    painter.drawPath(path);
+
+    QWidget::paintEvent(event);
 }

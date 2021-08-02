@@ -12,12 +12,15 @@ namespace ui
         Q_OBJECT
 
     public:
-        explicit MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent = nullptr);
+        MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent = nullptr);
         ~MonitoringToolWidget();
 
         void setServerStatus(ushort serverId, ServerStatus status);
 
         QSize sizeHint() const override;
+
+    protected:
+        virtual void paintEvent(QPaintEvent *event) override;
 
     signals:
         void closeApp();
