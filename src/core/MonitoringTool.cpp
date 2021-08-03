@@ -20,6 +20,9 @@ class core::MonitoringToolPrivate : public QObject
 
     QString _settingsFileName = QString("radhud.ini");
 
+    QString _icmpPortTag = "ICMP";
+    QString _udpPortTag = "*";
+
 public:
     explicit MonitoringToolPrivate(MonitoringTool *q)
         : q_ptr(q)
@@ -31,7 +34,7 @@ public:
 private:
     void createMonitorsManager()
     {
-        _serversManager = new ServersManager(10000, 3, this);
+        _serversManager = new ServersManager(this);
     }
 
     void createMonitorWidget(const QMap<ushort, QString> &info)
@@ -76,10 +79,10 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     for (auto si : servers)
     {
         ushort id;
-        if (si.port == core::IcmpPort)
+        if (si.port == d->_icmpPortTag)
             id = d->_serversManager->addICMPServer(si.name, si.addr);
-        else if (si.port.contains(core::UdpPort))
-            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(core::UdpPort).toInt());
+        else if (si.port.contains(d->_udpPortTag))
+            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(d->_udpPortTag).toInt());
         else
             id = d->_serversManager->addTCPServer(si.name, si.addr, si.port.toInt());
 

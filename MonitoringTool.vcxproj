@@ -139,6 +139,7 @@
     <QtMoc Include="src\net\ICMPServerMonitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ui\StatusColor.h" />
     <QtMoc Include="src\ui\Separator.h" />
     <QtMoc Include="src\ui\ServerStatusWidget.h" />
     <QtMoc Include="src\core\MonitoringTool.h" />

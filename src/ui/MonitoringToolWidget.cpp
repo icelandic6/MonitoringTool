@@ -2,6 +2,7 @@
 #include "ServerStatusWidget.h"
 #include "ControlButton.h"
 #include "Separator.h"
+#include "StatusColor.h"
 
 #include <QPushButton>
 #include <QGridLayout>
@@ -33,6 +34,8 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     QSystemTrayIcon *_trayIcon = nullptr;
 
     QPoint _movePosition;
+
+    QColor _backgroundColor;
 
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
@@ -203,13 +206,7 @@ public:
     {
         Q_Q(MonitoringToolWidget);
 
-        QColor color;
-        if (status == core::ServerStatus::Available)
-            color = QColor(100, 200, 100);
-        else if (status == core::ServerStatus::Unstable)
-            color = QColor(200, 200, 100);
-        else if (status == core::ServerStatus::Failed)
-            color = QColor(200, 100, 100);
+        QColor color = statusColor(status);
 
         QPixmap trayPixmap(16, 16);
         trayPixmap.fill(Qt::transparent);
@@ -237,6 +234,8 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
 
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
+
+    d->_backgroundColor = core::AppSettings::instance()->config().backgroundColor;
 
     d->addServers(serversInfo);
     d->createSeparator();
@@ -282,7 +281,7 @@ void ui::MonitoringToolWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setBrush(Qt::white);
+    painter.setBrush(d->_backgroundColor);
     painter.setPen(Qt::transparent);
 
     QPainterPath path;

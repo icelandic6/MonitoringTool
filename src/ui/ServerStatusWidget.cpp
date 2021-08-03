@@ -1,4 +1,6 @@
 #include "ServerStatusWidget.h"
+#include "StatusColor.h"
+#include "core/AppSettings.h"
 
 #include <QPaintEvent>
 #include <QPainter>
@@ -14,7 +16,7 @@ class ui::ServerStatusWidgetPrivate : public QObject
 
     QString _name;
 
-    QColor _color = QColor(100, 200, 100);
+    QColor _color;
     qreal _radius = 11.5;
 
 public:
@@ -36,6 +38,7 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 
     d->_name = name;
 
+    setStatus(core::ServerStatus::Available);
     setToolTip(name);
 }
 
@@ -45,13 +48,7 @@ void ui::ServerStatusWidget::setStatus(core::ServerStatus status)
 {
     Q_D(ServerStatusWidget);
 
-    if (status == core::ServerStatus::Available)
-        d->_color = QColor(100, 200, 100);
-    else if (status == core::ServerStatus::Unstable)
-        d->_color = QColor(200, 200, 100);
-    else if (status == core::ServerStatus::Failed)
-        d->_color = QColor(200, 100, 100);
-
+    d->_color = ui::statusColor(status);
     update();
 }
 

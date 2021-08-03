@@ -1,24 +1,12 @@
 #include "AppSettings.h"
 
 #include <QSettings>
-#include <QColor>
 #include <QFile>
 #include <QMessageBox>
 #include <QApplication>
 
 #include <QDebug>
 
-
-struct IniConfig
-{
-    QColor backgroundColor;
-    QColor greenColor;
-    QColor yellowColor;
-    QColor redColor;
-
-    int frequencySeconds;
-    int sensitivity;
-};
 
 class core::AppSettingsPrivate : public QObject
 {
@@ -27,7 +15,7 @@ class core::AppSettingsPrivate : public QObject
     AppSettings *q_ptr = nullptr;
 
     QString _filename;
-    IniConfig _config;
+    AppConfig _config;
 
     int _defaultFrequency = 15;
     int _defaultSensitivity = 3;
@@ -44,7 +32,6 @@ public:
     {
         QSettings settings(_filename, QSettings::IniFormat);
 
-        qDebug() << "==== ALL SETTINGS: \n" << settings.allKeys();
         settings.beginGroup("colors");
         _config.backgroundColor = QColor(QString("#%1")
             .arg(settings.value("backgroundColor", "fafafa").toString()));
@@ -133,6 +120,13 @@ void core::AppSettings::readFile(const QString &iniFileName)
 
     d->_filename = iniFileName;
     d->readSettings();
+}
+
+const core::AppConfig & core::AppSettings::config() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config;
 }
 
 core::AppSettings* core::AppSettings::instance()

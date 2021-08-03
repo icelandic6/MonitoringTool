@@ -1,18 +1,27 @@
 #pragma once
 
 #include <QObject>
+#include <QColor>
 
 namespace core
 {
+    struct AppConfig
+    {
+        QColor backgroundColor;
+        QColor greenColor;
+        QColor yellowColor;
+        QColor redColor;
+
+        int frequencySeconds;
+        int sensitivity;
+    };
+
     struct ServerInfo
     {
         QString name;
         QString addr;
         QString port;
     };
-
-    static QString IcmpPort = "ICMP";
-    static QString UdpPort = "*";
 
     class AppSettingsPrivate;
     class AppSettings : public QObject
@@ -22,6 +31,8 @@ namespace core
         ~AppSettings();
 
         void readFile(const QString &iniFileName);
+
+        const AppConfig &config() const;
 
         static AppSettings *instance();
         QList<ServerInfo> serversInfo();
