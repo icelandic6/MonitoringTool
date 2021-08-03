@@ -32,6 +32,8 @@ class ui::MonitoringToolWidgetPrivate : public QObject
 
     QSystemTrayIcon *_trayIcon = nullptr;
 
+    QPoint _movePosition;
+
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
         : q_ptr(q)
@@ -152,7 +154,6 @@ public:
 
         auto spacing = q->layout()->spacing();
         auto m = q->layout()->contentsMargins();
-        int w = 0, h = 0;
         
         int cellsSize = _statusWidgets.size() * ServerStatusWidget::cellSize();
         int cellsSpacing = spacing * (_statusWidgets.size() - 1);
@@ -160,20 +161,27 @@ public:
         int buttonsLength = _controlButtons.size() * ControlButton::buttonSize();
         int buttonsSpacing = spacing * (_controlButtons.size() - 1);
         int separatorLength = spacing * 2 + (horizontal() ? _separator->width() : _separator->height());
+
         int wholeLength = cellsSize + cellsSpacing + separatorLength + buttonsLength + buttonsSpacing;
 
-        if (horizontal())
-        {
-            w = wholeLength;
-            h = ServerStatusWidget::cellSize();
-        }
-        else
-        {
-            h = wholeLength;
-            w = ServerStatusWidget::cellSize();
-        }
+        int w = horizontal() ? wholeLength : ServerStatusWidget::cellSize();
+        int h = horizontal() ? ServerStatusWidget::cellSize() : wholeLength;
 
         return QSize(m.left() + w + m.right(), m.top() + h + m.bottom());
+    }
+
+    QRect movingRect() const
+    {
+        Q_Q(const MonitoringToolWidget);
+
+        auto m = q->layout()->contentsMargins();
+        int cellsSize = _statusWidgets.size() * ServerStatusWidget::cellSize();
+        int cellsSpacing = q->layout()->spacing() * _statusWidgets.size();
+
+        int w = horizontal() ? (cellsSize + cellsSpacing) : ServerStatusWidget::cellSize();
+        int h = horizontal() ? ServerStatusWidget::cellSize() : cellsSize + cellsSpacing;
+
+        return QRect(0, 0, m.left() + w + m.right(), m.top() + h + m.bottom());
     }
 
     void minimize()
@@ -282,4 +290,33 @@ void ui::MonitoringToolWidget::paintEvent(QPaintEvent *event)
     painter.drawPath(path);
 
     QWidget::paintEvent(event);
+}
+
+void ui::MonitoringToolWidget::mousePressEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (d->movingRect().contains(event->pos()))
+        d->_movePosition = event->pos();
+
+    QWidget::mousePressEvent(event);
+}
+
+void ui::MonitoringToolWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (!d->_movePosition.isNull())
+        this->move(pos() + event->pos() - d->_movePosition);
+
+    QWidget::mouseMoveEvent(event);
+}
+
+void ui::MonitoringToolWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    d->_movePosition = QPoint();
+
+    QWidget::mouseMoveEvent(event);
 }
