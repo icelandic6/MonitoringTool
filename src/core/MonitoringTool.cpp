@@ -67,8 +67,10 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
 
     d->createMonitorsManager();
 
-    AppSettings settings(d->_settingsFileName);
-    auto servers = settings.serversInfo();
+    auto settings = AppSettings::instance();
+    settings->readFile(d->_settingsFileName);
+    
+    auto servers = settings->serversInfo();
     QMap<ushort, QString> idNames;
 
     for (auto si : servers)

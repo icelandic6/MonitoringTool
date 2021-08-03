@@ -120,8 +120,14 @@ public:
 };
 
 
-core::AppSettings::AppSettings(const QString &iniFileName)
+core::AppSettings::AppSettings()
     : d_ptr(new AppSettingsPrivate(this))
+{
+}
+
+core::AppSettings::~AppSettings() = default;
+
+void core::AppSettings::readFile(const QString &iniFileName)
 {
     Q_D(AppSettings);
 
@@ -129,7 +135,14 @@ core::AppSettings::AppSettings(const QString &iniFileName)
     d->readSettings();
 }
 
-core::AppSettings::~AppSettings() = default;
+core::AppSettings* core::AppSettings::instance()
+{
+    static AppSettings *_instance = nullptr;
+    if (_instance == nullptr)
+        _instance = new AppSettings();
+
+    return _instance;
+}
 
 QList<core::ServerInfo> core::AppSettings::serversInfo()
 {

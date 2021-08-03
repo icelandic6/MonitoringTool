@@ -19,11 +19,15 @@ namespace core
     {
         Q_OBJECT
     public:
-        explicit AppSettings(const QString &iniFileName);
         ~AppSettings();
 
-//         static AppSettings *instance();
+        void readFile(const QString &iniFileName);
+
+        static AppSettings *instance();
         QList<ServerInfo> serversInfo();
+
+    private:
+        explicit AppSettings();
 
     private:
         QScopedPointer<AppSettingsPrivate> d_ptr;
