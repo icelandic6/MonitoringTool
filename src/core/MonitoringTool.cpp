@@ -34,6 +34,13 @@ private:
         _serversManager = new ServersManager(10000, 3, this);
     }
 
+    void createMonitorWidget(const QMap<ushort, QString> &info)
+    {
+        _monitoringWidget = new ui::MonitoringToolWidget(info);
+        _monitoringWidget->show();
+        _monitoringWidget->setTrayServerStatus(info.first(), core::ServerStatus::Available);
+    }
+
 public:
     void minimizeApp()
     {
@@ -77,9 +84,7 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
         idNames[id] = si.name;
     }
 
-    d->_monitoringWidget = new ui::MonitoringToolWidget(idNames);
-    d->_monitoringWidget->show();
-    d->_monitoringWidget->setTrayServerStatus(idNames.first(), core::ServerStatus::Available);
+    d->createMonitorWidget(idNames);
 
     connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, d, &MonitoringToolPrivate::closeApp);
     connect(d->_serversManager, &ServersManager::serverStatusUpdated, this, [this](ushort serverId, ServerStatus status)
