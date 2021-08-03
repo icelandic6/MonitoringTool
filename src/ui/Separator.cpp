@@ -9,6 +9,14 @@ ui::Separator::Separator(QWidget *parent)
 
 ui::Separator::~Separator() = default;
 
+void ui::Separator::setOrientation(Qt::Orientation orientation)
+{
+    if (orientation == Qt::Horizontal)
+        setFixedSize(1, 40);
+    else
+        setFixedSize(40, 1);
+}
+
 void ui::Separator::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
