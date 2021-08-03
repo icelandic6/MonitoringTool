@@ -100,6 +100,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\AppSettings.cpp" />
     <ClCompile Include="src\core\MonitoringTool.cpp" />
     <ClCompile Include="src\core\Server.cpp" />
     <ClCompile Include="src\core\ServersManager.cpp" />
@@ -143,6 +144,7 @@
     <QtMoc Include="src\core\MonitoringTool.h" />
     <QtMoc Include="src\core\ServersManager.h" />
     <QtMoc Include="src\core\Server.h" />
+    <QtMoc Include="src\core\AppSettings.h" />
     <ClInclude Include="src\core\ServerStatus.h" />
     <ClInclude Include="src\net\ICMPMessage.h" />
     <QtMoc Include="src\ui\ControlButton.h" />

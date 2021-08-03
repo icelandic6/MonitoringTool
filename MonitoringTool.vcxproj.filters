@@ -61,6 +61,9 @@
     <ClCompile Include="src\ui\Separator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\AppSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\ui\Separator.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\AppSettings.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

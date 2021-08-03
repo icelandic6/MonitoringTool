@@ -1,14 +1,12 @@
 #include "MonitoringTool.h"
 #include "ServersManager.h"
 #include "ServerStatus.h"
+#include "AppSettings.h"
 
 #include "ui/MonitoringToolWidget.h"
 
-#include "net/TCPServerMonitor.h"
-#include "net/UDPServerMonitor.h"
-#include "net/ICMPServerMonitor.h"
-
 #include <QApplication>
+#include <QDebug>
 
 class core::MonitoringToolPrivate : public QObject
 {
@@ -18,11 +16,9 @@ class core::MonitoringToolPrivate : public QObject
 
     ui::MonitoringToolWidget *_monitoringWidget = nullptr;
 
-    ServerMonitor *_tcpServerMonitor = nullptr;
-    ServerMonitor *_udpServerMonitor = nullptr;
-    ServerMonitor *_icmpServerMonitor = nullptr;
-
     ServersManager *_serversManager = nullptr;
+
+    QString _settingsFileName = QString("radhud.ini");
 
 public:
     explicit MonitoringToolPrivate(MonitoringTool *q)
@@ -44,14 +40,14 @@ public:
         _monitoringWidget->setWindowState(Qt::WindowMinimized);
     }
 
-    void closeApp()
-    {
-        qApp->exit();
-    }
-
     void updateTrayIcon(const QString &name, core::ServerStatus status)
     {
         _monitoringWidget->setTrayServerStatus(name, status);
+    }
+
+    void closeApp()
+    {
+        qApp->exit();
     }
 };
 
@@ -64,55 +60,28 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
 
     d->createMonitorsManager();
 
-//     QString addr("google.com");
-//     QString addr("127.0.0.1");
-    QString valid_addr("64.233.165.139");
-    QString invalid_addr("69.69.69.69");
-//     QString addr("http://example.com");
+    AppSettings settings(d->_settingsFileName);
+    auto servers = settings.serversInfo();
+    QMap<ushort, QString> idNames;
 
-    QMap<ushort, QString> serversInfo;
-
-    QString name = "TCP Host 1";
-    ushort id = d->_serversManager->addTCPServer(name, valid_addr, 80);
-    serversInfo[id] = name;
-
-    name = "TCP Host 2";
-    id = d->_serversManager->addTCPServer(name, invalid_addr, 80);
-    serversInfo[id] = name;
-
-    name = "UDP Host";
-    id = d->_serversManager->addUDPServer(name, valid_addr, 80);
-    serversInfo[id] = name;
-
-    name = "ICMP Host";
-    id = d->_serversManager->addICMPServer(name, valid_addr);
-    serversInfo[id] = name;
-
-    name = "ICMP Host 2";
-    id = d->_serversManager->addICMPServer(name, valid_addr);
-    serversInfo[id] = name;
-
-    name = "ICMP Host 3";
-    id = d->_serversManager->addICMPServer(name, valid_addr);
-    serversInfo[id] = name;
-
-//     name = "ICMP Host 4";
-//     id = d->_serversManager->addICMPServer(name, valid_addr);
-//     serversInfo[id] = name;
-
-//     name = "ICMP Host 5";
-//     id = d->_serversManager->addICMPServer(name, valid_addr);
-//     serversInfo[id] = name;
-
-    d->_monitoringWidget = new ui::MonitoringToolWidget(serversInfo);
-    d->_monitoringWidget->show();
-    d->_monitoringWidget->setTrayServerStatus(name, core::ServerStatus::Available);
-
-    connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, this, [this]()
+    for (auto si : servers)
     {
-        qApp->exit();
-    });
+        ushort id;
+        if (si.port == core::IcmpPort)
+            id = d->_serversManager->addICMPServer(si.name, si.addr);
+        else if (si.port.contains(core::UdpPort))
+            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(core::UdpPort).toInt());
+        else
+            id = d->_serversManager->addTCPServer(si.name, si.addr, si.port.toInt());
 
+        idNames[id] = si.name;
+    }
+
+    d->_monitoringWidget = new ui::MonitoringToolWidget(idNames);
+    d->_monitoringWidget->show();
+    d->_monitoringWidget->setTrayServerStatus(idNames.first(), core::ServerStatus::Available);
+
+    connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, d, &MonitoringToolPrivate::closeApp);
     connect(d->_serversManager, &ServersManager::serverStatusUpdated, this, [this](ushort serverId, ServerStatus status)
     {
         Q_D(MonitoringTool);
@@ -124,8 +93,7 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
 
         qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
     });
-    connect(d->_serversManager, &ServersManager::worstServerUpdated,
-            d, &MonitoringToolPrivate::updateTrayIcon);
+    connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIcon);
 }
 
 core::MonitoringTool::~MonitoringTool()
