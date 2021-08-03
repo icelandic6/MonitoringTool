@@ -11,6 +11,8 @@ namespace ui
         explicit Separator(QWidget *parent);
         ~Separator();
 
+        void setOrientation(Qt::Orientation orientation);
+
     protected:
         virtual void paintEvent(QPaintEvent *event) override;
     };

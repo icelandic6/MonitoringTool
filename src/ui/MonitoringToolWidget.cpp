@@ -26,13 +26,13 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     ControlButton *_minimizeButton = nullptr;
     QList<ControlButton*> _controlButtons;
 
-    const int _rowsMax = 5;
-
     QGridLayout *_statusesLayout = nullptr;
     QGridLayout *_buttonsLayout = nullptr;
     QGridLayout *_mainLayout = nullptr;
 
     QSystemTrayIcon *_trayIcon = nullptr;
+
+    QPoint _movePosition;
 
 public:
     explicit MonitoringToolWidgetPrivate(MonitoringToolWidget *q)
@@ -64,7 +64,7 @@ private:
         Q_Q(MonitoringToolWidget);
 
         _separator = new Separator(q);
-        updateSeparator();
+        _separator->setOrientation(_orientation);
     }
 
     void createSystemTrayIcon()
@@ -85,49 +85,6 @@ private:
         return _orientation == Qt::Horizontal;
     }
 
-    void updateStatusesLayout()
-    {
-        int rc = 0;
-
-        if (_statusWidgets.size() <= _rowsMax)
-        {
-            for (const auto &sw : _statusWidgets.values())
-            {
-                _statusesLayout->addWidget(sw, horizontal() ? 0 : rc, horizontal() ? rc : 0, 2, 2);
-                rc += 2;
-            }
-        }
-        else
-        {
-            auto evenSize = _statusWidgets.size() % 2 == 0
-                ? _statusWidgets.size() / 2
-                : _statusWidgets.size() / 2 + 1;
-            int r = 0;
-            int c = 0;
-
-            for (const auto &sw : _statusWidgets.values())
-            {
-                _statusesLayout->addWidget(sw, r, c, 2, 2);
-                rc++;
-
-                if (horizontal())
-                {
-                    r = (rc < evenSize) ? 0 : 2;
-                    c += 2;
-                    if (c >= _statusWidgets.size())
-                        c = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
-                }
-                else
-                {
-                    c = (rc < evenSize) ? 0 : 2;
-                    r += 2;
-                    if (r >= _statusWidgets.size())
-                        r = (_statusWidgets.size() % 2 == 0) ? 0 : 1;
-                }
-            }
-        }
-    }
-
     void createLayouts()
     {
         Q_Q(MonitoringToolWidget);
@@ -136,7 +93,13 @@ private:
         _statusesLayout->setAlignment(Qt::AlignCenter);
         _statusesLayout->setContentsMargins(QMargins(0, 0, 0, 0));
         _statusesLayout->setSpacing(0);
-        updateStatusesLayout();
+
+        int rc = 0;
+        for (const auto &sw : _statusWidgets.values())
+        {
+            _statusesLayout->addWidget(sw, horizontal() ? 0 : rc, horizontal() ? rc : 0, 1, 1);
+            rc++;
+        }
 
         _buttonsLayout = new QGridLayout();
         _buttonsLayout->setAlignment(Qt::AlignCenter);
@@ -172,15 +135,6 @@ private:
             delete _mainLayout;
     }
 
-    void updateSeparator()
-    {
-        auto single = _statusWidgets.size() < _rowsMax;
-        _separator->setFixedSize(
-            horizontal()
-            ? QSize(1, single ? 40 : 64)
-            : QSize(single ? 40 : 64, 1));
-    }
-
 public:
     void rotate()
     {
@@ -188,8 +142,9 @@ public:
 
         _orientation = (_orientation == Qt::Horizontal) ? Qt::Vertical : Qt::Horizontal;
 
+        _separator->setOrientation(_orientation);
+
         removeLayouts();
-        updateSeparator();
         createLayouts();
     }
 
@@ -199,33 +154,34 @@ public:
 
         auto spacing = q->layout()->spacing();
         auto m = q->layout()->contentsMargins();
-        int w = 0, h = 0;
-        int evenSize = _statusWidgets.size() + (_statusWidgets.size() % 2 == 0 ? 0 : 1);
         
-        int cellsSize = _statusWidgets.size() <= _rowsMax
-            ? (_statusWidgets.size() * ServerStatusWidget::cellSize())
-            : (evenSize / 2) * ServerStatusWidget::cellSize();
-        int cellsSpacing = spacing * (_statusWidgets.size() <= _rowsMax
-                                     ? (_statusWidgets.size() - 1)
-                                     : (evenSize / 2 - 1));
+        int cellsSize = _statusWidgets.size() * ServerStatusWidget::cellSize();
+        int cellsSpacing = spacing * (_statusWidgets.size() - 1);
 
         int buttonsLength = _controlButtons.size() * ControlButton::buttonSize();
         int buttonsSpacing = spacing * (_controlButtons.size() - 1);
         int separatorLength = spacing * 2 + (horizontal() ? _separator->width() : _separator->height());
+
         int wholeLength = cellsSize + cellsSpacing + separatorLength + buttonsLength + buttonsSpacing;
 
-        if (horizontal())
-        {
-            w = wholeLength;
-            h = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
-        }
-        else
-        {
-            h = wholeLength;
-            w = ServerStatusWidget::cellSize() * (_statusWidgets.size() <= _rowsMax ? 1 : 2);
-        }
+        int w = horizontal() ? wholeLength : ServerStatusWidget::cellSize();
+        int h = horizontal() ? ServerStatusWidget::cellSize() : wholeLength;
 
         return QSize(m.left() + w + m.right(), m.top() + h + m.bottom());
+    }
+
+    QRect movingRect() const
+    {
+        Q_Q(const MonitoringToolWidget);
+
+        auto m = q->layout()->contentsMargins();
+        int cellsSize = _statusWidgets.size() * ServerStatusWidget::cellSize();
+        int cellsSpacing = q->layout()->spacing() * _statusWidgets.size();
+
+        int w = horizontal() ? (cellsSize + cellsSpacing) : ServerStatusWidget::cellSize();
+        int h = horizontal() ? ServerStatusWidget::cellSize() : cellsSize + cellsSpacing;
+
+        return QRect(0, 0, m.left() + w + m.right(), m.top() + h + m.bottom());
     }
 
     void minimize()
@@ -334,4 +290,33 @@ void ui::MonitoringToolWidget::paintEvent(QPaintEvent *event)
     painter.drawPath(path);
 
     QWidget::paintEvent(event);
+}
+
+void ui::MonitoringToolWidget::mousePressEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (d->movingRect().contains(event->pos()))
+        d->_movePosition = event->pos();
+
+    QWidget::mousePressEvent(event);
+}
+
+void ui::MonitoringToolWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (!d->_movePosition.isNull())
+        this->move(pos() + event->pos() - d->_movePosition);
+
+    QWidget::mouseMoveEvent(event);
+}
+
+void ui::MonitoringToolWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    Q_D(MonitoringToolWidget);
+
+    d->_movePosition = QPoint();
+
+    QWidget::mouseMoveEvent(event);
 }
