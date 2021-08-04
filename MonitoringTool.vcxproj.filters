@@ -112,9 +112,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\net\ICMPMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\ServerStatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>

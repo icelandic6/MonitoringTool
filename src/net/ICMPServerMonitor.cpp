@@ -1,7 +1,3 @@
-#pragma comment(lib, "Ws2_32.lib")
-#pragma comment(lib, "IPHLPAPI.lib")
-
-#include "ICMPMessage.h"
 #include "ICMPRequestWorker.h"
 #include "ICMPServerMonitor.h"
 
@@ -38,19 +34,11 @@ void ICMPServerMonitor::checkServer()
 {
     Q_D(ICMPServerMonitor);
 
-    qDebug() << "\n\n====== Running ICMP server check ======\n";
-
-    ICMPMessage message;
-
-    message.ipaddr = inet_addr(address().toStdString().c_str());
-    message.hIcmpFile = IcmpCreateFile();
-
-    message.ReplySize = sizeof(ICMP_ECHO_REPLY) + sizeof(message.SendData);
-    message.ReplyBuffer = (VOID*)malloc(message.ReplySize);
+    qDebug() << "\n====== Running ICMP server check ======";
 
     auto _requestThread = new QThread();
 
-    auto _requestWorker = new ICMPRequestWorker(message, 6000);
+    auto _requestWorker = new ICMPRequestWorker(address());
     _requestWorker->moveToThread(_requestThread);
 
     connect(_requestThread, &QThread::started, _requestWorker, &ICMPRequestWorker::send_request);

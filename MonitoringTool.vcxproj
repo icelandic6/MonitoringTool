@@ -147,7 +147,6 @@
     <QtMoc Include="src\core\Server.h" />
     <QtMoc Include="src\core\AppSettings.h" />
     <ClInclude Include="src\core\ServerStatus.h" />
-    <ClInclude Include="src\net\ICMPMessage.h" />
     <QtMoc Include="src\ui\ControlButton.h" />
     <QtMoc Include="src\net\ICMPRequestWorker.h" />
   </ItemGroup>
