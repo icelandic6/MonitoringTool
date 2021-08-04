@@ -232,7 +232,7 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
 {
     Q_D(MonitoringToolWidget);
 
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
 
     d->_backgroundColor = core::AppSettings::instance()->config().backgroundColor;
