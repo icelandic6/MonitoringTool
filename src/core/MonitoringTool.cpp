@@ -104,6 +104,8 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
         qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
     });
     connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIcon);
+
+    d->_serversManager->startMonitoring();
 }
 
 core::MonitoringTool::~MonitoringTool()

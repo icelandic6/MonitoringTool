@@ -85,12 +85,7 @@ core::ServersManager::ServersManager(QObject *parent)
 {
     Q_D(ServersManager);
 
-    d->_timer.setInterval(AppSettings::instance()->config().frequencySeconds);
-    d->_timer.setSingleShot(false);
-
     connect(&d->_timer, &QTimer::timeout, d, &ServersManagerPrivate::runServersCheck);
-
-    d->_timer.start();
 }
 
 core::ServersManager::~ServersManager() = default;
@@ -123,4 +118,13 @@ ushort core::ServersManager::addICMPServer(const QString &name, const QString &a
     d->addServer(server);
 
     return server->id();
+}
+
+void core::ServersManager::startMonitoring()
+{
+    Q_D(ServersManager);
+
+    d->_timer.setInterval(AppSettings::instance()->config().frequencySeconds * 1000);
+    d->_timer.setSingleShot(false);
+    d->_timer.start();
 }
