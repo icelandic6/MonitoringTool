@@ -41,11 +41,6 @@ TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *pa
 
     qRegisterMetaType<QTcpSocket::SocketError>("SocketError");
 
-//     connect(d->_socket, &QTcpSocket::stateChanged, this, [this](QAbstractSocket::SocketState socketState)
-//     {
-//         qDebug() << QString("==== TCP CHECK: STATE %1").arg(socketState);
-//     });
-
     connect(d->_socket, &QTcpSocket::connected, this, [this]()
     {
         Q_D(TCPServerMonitor);
@@ -54,6 +49,7 @@ TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *pa
         d->_lastAttempt = true;
         d->_timeoutTimer.stop();
 
+        d->_socket->disconnectFromHost();
         d->_socket->close();
         emit finished(true);
     });
@@ -70,7 +66,7 @@ TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *pa
         if (d->_socket->state() != QAbstractSocket::SocketState::ConnectedState)
         {
             qDebug() << QString("==== TCP CHECK: TIMEOUT STATE = %1").arg(d->_socket->state());
-            d->_socket->close();
+            d->_socket->abort();
             emit finished(false);
         }
     });
@@ -85,6 +81,7 @@ void TCPServerMonitor::checkServer()
     qDebug() << "==== Running TCP server check";
     d->_timeoutTimer.stop();
     d->_lastAttempt = false;
+    d->_socket->disconnectFromHost();
     d->_socket->close();
 
     qDebug() << QString("==== TCP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
