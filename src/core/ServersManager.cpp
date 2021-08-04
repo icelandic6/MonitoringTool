@@ -1,13 +1,12 @@
 #include "ServersManager.h"
+#include "AppSettings.h"
+#include "Server.h"
 
 #include "net/TCPServerMonitor.h"
 #include "net/UDPServerMonitor.h"
 #include "net/ICMPServerMonitor.h"
 
-#include "Server.h"
-
 #include <QTimer>
-
 
 class core::ServersManagerPrivate : public QObject
 {
@@ -19,9 +18,6 @@ class core::ServersManagerPrivate : public QObject
     Server *_worstServer = nullptr;
 
     QTimer _timer;
-
-    int _frequency = 5000;
-    int _sensitivity = 2;
 
 public:
     explicit ServersManagerPrivate(ServersManager *q)
@@ -83,16 +79,13 @@ public:
 };
 
 
-core::ServersManager::ServersManager(int frequencySeconds, int sensitivity, QObject *parent)
+core::ServersManager::ServersManager(QObject *parent)
     : QObject(parent)
     , d_ptr(new ServersManagerPrivate(this))
 {
     Q_D(ServersManager);
 
-    d->_frequency = frequencySeconds;
-    d->_sensitivity = sensitivity;
-
-    d->_timer.setInterval(d->_frequency);
+    d->_timer.setInterval(AppSettings::instance()->config().frequencySeconds);
     d->_timer.setSingleShot(false);
 
     connect(&d->_timer, &QTimer::timeout, d, &ServersManagerPrivate::runServersCheck);
@@ -106,7 +99,7 @@ ushort core::ServersManager::addTCPServer(const QString &name, const QString &ad
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new TCPServerMonitor(address, port, this), d->_sensitivity);
+    auto server = new Server(name, new TCPServerMonitor(address, port, this));
     d->addServer(server);
 
     return server->id();
@@ -116,7 +109,7 @@ ushort core::ServersManager::addUDPServer(const QString &name, const QString &ad
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new UDPServerMonitor(address, port, this), d->_sensitivity);
+    auto server = new Server(name, new UDPServerMonitor(address, port, this));
     d->addServer(server);
 
     return server->id();
@@ -126,7 +119,7 @@ ushort core::ServersManager::addICMPServer(const QString &name, const QString &a
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new ICMPServerMonitor(address, this), d->_sensitivity);
+    auto server = new Server(name, new ICMPServerMonitor(address, this));
     d->addServer(server);
 
     return server->id();

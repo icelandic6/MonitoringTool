@@ -14,7 +14,7 @@ namespace core
         Q_OBJECT
 
     public:
-        explicit Server(const QString &name, ServerMonitor *monitor, short sensitivity, QObject *parent = nullptr);
+        Server(const QString &name, ServerMonitor *monitor, QObject *parent = nullptr);
         ~Server();
 
         void runCheck();

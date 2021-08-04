@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "AppSettings.h"
 
 #include "net/ServerMonitor.h"
 #include "net/TCPServerMonitor.h"
@@ -91,7 +92,7 @@ public:
     }
 };
 
-core::Server::Server(const QString &name, ServerMonitor *monitor, short sensitivity, QObject *parent)
+core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *parent)
     : QObject(parent)
     , d_ptr(new ServerPrivate(this))
 {
@@ -100,7 +101,7 @@ core::Server::Server(const QString &name, ServerMonitor *monitor, short sensitiv
     d->_id = ::nextId++;
     d->_name = name;
     d->_monitor = monitor;
-    d->_sensitivity = sensitivity;
+    d->_sensitivity = AppSettings::instance()->config().sensitivity;
 
     connect(d->_monitor, &ServerMonitor::finished, d, &ServerPrivate::handleCheck);
 }

@@ -12,7 +12,7 @@ namespace core
         Q_OBJECT
 
     public:
-        explicit ServersManager(int frequencySeconds, int sensitivity, QObject *parent = nullptr);
+        explicit ServersManager(QObject *parent = nullptr);
         ~ServersManager();
 
         ushort addTCPServer(const QString &name, const QString &address, int port);
