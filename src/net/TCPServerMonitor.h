@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QHostAddress>
+#include <QAbstractSocket>
 
 #include "ServerMonitor.h"
 
@@ -11,9 +11,8 @@ class TCPServerMonitor : public ServerMonitor
     Q_OBJECT
 
 public:
-//     TCPServerMonitor(QHostAddress hostAddress, int port, QObject *parent);
     TCPServerMonitor(const QString &address, int port, QObject *parent);
-    virtual ~TCPServerMonitor() override;
+    ~TCPServerMonitor() override;
 
     void checkServer() override;
 

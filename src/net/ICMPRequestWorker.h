@@ -9,7 +9,7 @@ class ICMPRequestWorker : public QObject
 
 public:
     ICMPRequestWorker(const QString &addr, QObject *parent = nullptr);
-    virtual ~ICMPRequestWorker();
+    ~ICMPRequestWorker() override;
 
     void send_request();
 

@@ -1,14 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <QHostAddress>
-
-enum class ServerProtocol
-{
-    TCP,
-    UDP,
-    ICMP,
-};
 
 class ServerMonitorPrivate;
 class ServerMonitor : public QObject
@@ -16,7 +8,6 @@ class ServerMonitor : public QObject
     Q_OBJECT
 
 public:
-//     ServerMonitor(QString name, QHostAddress hostAddress, QObject *parent);
     ServerMonitor(const QString &address, QObject *parent);
     virtual ~ServerMonitor();
 

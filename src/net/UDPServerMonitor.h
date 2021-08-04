@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QHostAddress>
+#include <QAbstractSocket>
 
 #include "ServerMonitor.h"
 
@@ -12,7 +12,7 @@ class UDPServerMonitor : public ServerMonitor
 
 public:
     UDPServerMonitor(const QString &address, int port, QObject *parent);
-    virtual ~UDPServerMonitor() override;
+    ~UDPServerMonitor() override;
 
     void checkServer() override;
 

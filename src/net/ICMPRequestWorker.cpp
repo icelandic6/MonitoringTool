@@ -15,7 +15,7 @@ class ICMPRequestWorkerPrivate : public QObject
     Q_DISABLE_COPY(ICMPRequestWorkerPrivate)
     ICMPRequestWorker *q_ptr = nullptr;
 
-    int _timeout = 3000;
+    const int _timeout = 3000;
     QString _addr;
 
 public:
