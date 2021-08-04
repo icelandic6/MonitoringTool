@@ -73,6 +73,9 @@ public:
                     continue;
 
                 QStringList addr = line.simplified().split(" ");
+                if (addr.size() == 1 && addr.first().isEmpty())
+                    continue;
+
                 if (addr.size() != 3)
                 {
                     failed = true;
