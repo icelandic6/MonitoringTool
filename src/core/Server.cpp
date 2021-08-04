@@ -31,9 +31,15 @@ public:
 
     ~ServerPrivate() = default;
 
-    void handleCheck(bool success)
+    void handleCheck(bool success, int latency = 0)
     {
         qDebug() << QString("==== Server check [%1]: %2").arg(_name).arg(success);
+
+        if (latency != 0)
+        {
+            Q_Q(Server);
+            emit q->latencyChanged(latency);
+        }
 
         if ((success && _status == ServerStatus::Available) ||
             (!success && _status == ServerStatus::Failed))

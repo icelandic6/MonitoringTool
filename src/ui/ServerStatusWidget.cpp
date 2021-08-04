@@ -44,12 +44,28 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 
 ui::ServerStatusWidget::~ServerStatusWidget() = default;
 
+QString ui::ServerStatusWidget::name() const
+{
+    Q_D(const ServerStatusWidget);
+
+    return d->_name;
+}
+
 void ui::ServerStatusWidget::setStatus(core::ServerStatus status)
 {
     Q_D(ServerStatusWidget);
 
     d->_color = ui::statusColor(status);
     update();
+}
+
+void ui::ServerStatusWidget::setLatency(int latency)
+{
+    Q_D(ServerStatusWidget);
+
+    auto tooltip = QString("%1 %2ms").arg(d->_name).arg(latency);
+    if (tooltip != this->toolTip())
+        setToolTip(tooltip);
 }
 
 void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)

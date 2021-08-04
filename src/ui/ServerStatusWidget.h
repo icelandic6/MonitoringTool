@@ -14,7 +14,10 @@ namespace ui
         ServerStatusWidget(const QString &name, QWidget *parent = nullptr);
         virtual ~ServerStatusWidget() override;
 
+        QString name() const;
+
         void setStatus(core::ServerStatus status);
+        void setLatency(int latency);
 
         static int cellSize();
 

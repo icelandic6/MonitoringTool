@@ -23,7 +23,8 @@ namespace core
 
     signals:
         void serverStatusUpdated(ushort serverId, ServerStatus status);
-        void worstServerUpdated(const QString &name, ServerStatus status);
+        void serverLatencyUpdated(ushort serverId, int latency);
+        void worstServerUpdated(ushort serverId, ServerStatus status);
 
     private:
         QScopedPointer<ServersManagerPrivate> d_ptr;

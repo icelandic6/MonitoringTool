@@ -16,7 +16,7 @@ public:
     void send_request();
 
 signals:
-    void ready(bool success);
+    void ready(bool success, int latency);
 
 private:
     QScopedPointer<ICMPRequestWorkerPrivate> d_ptr;

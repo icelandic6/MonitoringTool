@@ -36,19 +36,31 @@ public:
     void addServer(Server *server)
     {
         _servers.append(server);
+        connect(server, &Server::statusChanged, this, &ServersManagerPrivate::onStatusChanged);
+        connect(server, &Server::latencyChanged, this, &ServersManagerPrivate::onLatencyChanged);
+    }
 
-        connect(server, &Server::statusChanged, this, [this]()
-        {
-            Q_Q(ServersManager);
+    void onStatusChanged()
+    {
+        Q_Q(ServersManager);
 
-            auto server = static_cast<Server*>(sender());
-            checkIfWorstServer(server);
+        auto server = static_cast<Server*>(sender());
+        checkIfWorstServer(server);
 
-            emit q->serverStatusUpdated(server->id(), server->status());
-        });
+        emit q->serverStatusUpdated(server->id(), server->status());
 
         if (_worstServer == nullptr)
             setWorstServer(server);
+    }
+
+    void onLatencyChanged(int latency)
+    {
+        Q_Q(ServersManager);
+
+        auto server = static_cast<Server*>(sender());
+
+        if (latency)
+            emit q->serverLatencyUpdated(server->id(), latency);
     }
 
     void setWorstServer(Server *server)
@@ -58,11 +70,17 @@ public:
         qDebug() << "\n**** NEW WORST SERVER: [" << server->name() << "|" << (server->status() == ServerStatus::Available ? "AVAILABLE" : (server->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]\n\n";
 
         _worstServer = server;
-        emit q->worstServerUpdated(_worstServer->name(), _worstServer->status());
+        emit q->worstServerUpdated(_worstServer->id(), _worstServer->status());
     }
 
     void checkIfWorstServer(Server *server)
     {
+        if (_worstServer == nullptr)
+        {
+            setWorstServer(server);
+            return;
+        }
+
         if (server->id() == _worstServer->id())
         {
             for (auto &s : _servers)

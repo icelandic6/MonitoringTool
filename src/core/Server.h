@@ -26,6 +26,7 @@ namespace core
 
     signals:
         void statusChanged();
+        void latencyChanged(int value);
 
     private:
         QScopedPointer<ServerPrivate> d_ptr;

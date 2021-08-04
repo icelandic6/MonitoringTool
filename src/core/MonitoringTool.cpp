@@ -41,18 +41,28 @@ private:
     {
         _monitoringWidget = new ui::MonitoringToolWidget(info);
         _monitoringWidget->show();
-        _monitoringWidget->setTrayServerStatus(info.first(), core::ServerStatus::Available);
+        _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
     }
 
 public:
+    void updateServerLatency(ushort id, int latency)
+    {
+        _monitoringWidget->setServerLatency(id, latency);
+    }
+
     void minimizeApp()
     {
         _monitoringWidget->setWindowState(Qt::WindowMinimized);
     }
 
-    void updateTrayIcon(const QString &name, core::ServerStatus status)
+    void updateTrayIconStatus(ushort id, core::ServerStatus status)
     {
-        _monitoringWidget->setTrayServerStatus(name, status);
+        _monitoringWidget->setTrayServerStatus(id, status);
+    }
+
+    void updateTrayIconTooltip(ushort id, int latency)
+    {
+        _monitoringWidget->setTrayServerTooltip(id, latency);
     }
 
     void closeApp()
@@ -103,7 +113,9 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
 
         qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
     });
-    connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIcon);
+    connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIconStatus);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconTooltip);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateServerLatency);
 
     d->_serversManager->startMonitoring();
 }

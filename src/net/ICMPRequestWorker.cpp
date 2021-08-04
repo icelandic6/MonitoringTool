@@ -4,9 +4,7 @@
 #include "iphlpapi.h"
 #include "icmpapi.h"
 
-#include <QtNetwork/QTcpSocket>
-#include <QTimer>
-#include <QThread>
+#include <chrono>
 
 
 class ICMPRequestWorkerPrivate : public QObject
@@ -45,6 +43,8 @@ void ICMPRequestWorker::send_request()
 {
     Q_D(ICMPRequestWorker);
 
+    auto timeStart = std::chrono::high_resolution_clock::now();
+
     DWORD dwRetVal = IcmpSendEcho(
         d->_message.hIcmpFile,
         d->_message.ipaddr,
@@ -55,7 +55,12 @@ void ICMPRequestWorker::send_request()
         d->_message.ReplySize,
         d->_timeout);
 
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+
+    auto latency = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
+
     free(d->_message.ReplyBuffer);
 
-    emit ready(dwRetVal != 0);
+
+    emit ready(dwRetVal != 0, latency);
 }

@@ -59,9 +59,9 @@ void ICMPServerMonitor::checkServer()
     connect(_requestWorker, &ICMPRequestWorker::ready, _requestThread, &QThread::quit);
     connect(_requestWorker, &ICMPRequestWorker::ready, _requestWorker, &QObject::deleteLater);
 
-    connect(_requestWorker, &ICMPRequestWorker::ready, this, [this](bool success)
+    connect(_requestWorker, &ICMPRequestWorker::ready, this, [this](bool success, int latency)
     {
-        emit finished(success);
+        emit finished(success, latency);
     });
 
     _requestThread->start();
