@@ -4,7 +4,6 @@
 
 #include <QPaintEvent>
 #include <QPainter>
-#include <QDebug>
 
 static int cellSize = 40;
 
@@ -17,7 +16,7 @@ class ui::ServerStatusWidgetPrivate : public QObject
     QString _name;
 
     QColor _color;
-    qreal _radius = 11.5;
+    const qreal _radius = 11.5;
 
 public:
     explicit ServerStatusWidgetPrivate(ServerStatusWidget *q)

@@ -83,9 +83,6 @@
     <QtMoc Include="src\net\UDPServerMonitor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\net\ICMPServerMonitor.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="src\net\ICMPRequestWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -98,10 +95,7 @@
     <QtMoc Include="src\core\ServersManager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\ui\ServerStatusWidget.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\ui\Separator.h">
+    <QtMoc Include="src\net\ICMPServerMonitor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -116,6 +110,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\MonitoringTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\Separator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\ServerStatusWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

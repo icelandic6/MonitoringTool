@@ -14,7 +14,7 @@ namespace net
 
     public:
         ICMPServerMonitor(const QString &address, QObject *parent);
-        virtual ~ICMPServerMonitor() override;
+        ~ICMPServerMonitor() override;
 
         void checkServer() override;
 

@@ -140,8 +140,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ui\StatusColor.h" />
-    <QtMoc Include="src\ui\Separator.h" />
-    <QtMoc Include="src\ui\ServerStatusWidget.h" />
+    <ClInclude Include="src\ui\Separator.h" />
+    <ClInclude Include="src\ui\ServerStatusWidget.h" />
     <ClInclude Include="src\core\MonitoringTool.h" />
     <QtMoc Include="src\core\ServersManager.h" />
     <QtMoc Include="src\core\Server.h" />

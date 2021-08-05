@@ -6,7 +6,6 @@ namespace ui
 {
     class Separator : public QWidget
     {
-        Q_OBJECT
     public:
         explicit Separator(QWidget *parent);
         ~Separator();
@@ -14,6 +13,6 @@ namespace ui
         void setOrientation(Qt::Orientation orientation);
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
     };
 }
