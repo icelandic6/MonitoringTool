@@ -112,7 +112,7 @@ ushort core::ServersManager::addTCPServer(const QString &name, const QString &ad
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new TCPServerMonitor(address, port, this));
+    auto server = new Server(name, new net::TCPServerMonitor(address, port, this));
     d->addServer(server);
 
     return server->id();
@@ -122,7 +122,7 @@ ushort core::ServersManager::addUDPServer(const QString &name, const QString &ad
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new UDPServerMonitor(address, port, this));
+    auto server = new Server(name, new net::UDPServerMonitor(address, port, this));
     d->addServer(server);
 
     return server->id();
@@ -132,7 +132,7 @@ ushort core::ServersManager::addICMPServer(const QString &name, const QString &a
 {
     Q_D(ServersManager);
 
-    auto server = new Server(name, new ICMPServerMonitor(address, this));
+    auto server = new Server(name, new net::ICMPServerMonitor(address, this));
     d->addServer(server);
 
     return server->id();

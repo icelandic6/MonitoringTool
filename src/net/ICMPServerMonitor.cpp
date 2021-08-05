@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QHostInfo>
 
-class ICMPServerMonitorPrivate : public QObject
+class net::ICMPServerMonitorPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(ICMPServerMonitor)
     Q_DISABLE_COPY(ICMPServerMonitorPrivate)
@@ -42,7 +42,7 @@ public:
     }
 };
 
-ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *parent)
+net::ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *parent)
     : ServerMonitor(address, parent)
     , d_ptr(new ICMPServerMonitorPrivate(this))
 {
@@ -59,9 +59,9 @@ ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *parent)
     }
 }
 
-ICMPServerMonitor::~ICMPServerMonitor() = default;
+net::ICMPServerMonitor::~ICMPServerMonitor() = default;
 
-void ICMPServerMonitor::checkServer()
+void net::ICMPServerMonitor::checkServer()
 {
     Q_D(ICMPServerMonitor);
 

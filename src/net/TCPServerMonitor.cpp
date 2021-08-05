@@ -3,7 +3,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QTimer>
 
-class TCPServerMonitorPrivate : public QObject
+class net::TCPServerMonitorPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(TCPServerMonitor)
     Q_DISABLE_COPY(TCPServerMonitorPrivate)
@@ -24,7 +24,7 @@ public:
     ~TCPServerMonitorPrivate() = default;
 };
 
-TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *parent)
+net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *parent)
     : ServerMonitor(address, parent)
     , d_ptr(new TCPServerMonitorPrivate(this))
 {
@@ -69,9 +69,9 @@ TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObject *pa
     });
 }
 
-TCPServerMonitor::~TCPServerMonitor() = default;
+net::TCPServerMonitor::~TCPServerMonitor() = default;
 
-void TCPServerMonitor::checkServer()
+void net::TCPServerMonitor::checkServer()
 {
     Q_D(TCPServerMonitor);
 
@@ -86,7 +86,7 @@ void TCPServerMonitor::checkServer()
     d->_timeoutTimer.start();
 }
 
-void TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
+void net::TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
 {
     qDebug() << QString("==== TCP CHECK: ERROR [%1]").arg(socketError);
 

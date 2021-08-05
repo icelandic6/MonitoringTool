@@ -9,7 +9,7 @@
 
 #include <chrono>
 
-class ICMPRequestWorkerPrivate : public QObject
+class net::ICMPRequestWorkerPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(ICMPRequestWorker)
     Q_DISABLE_COPY(ICMPRequestWorkerPrivate)
@@ -27,7 +27,7 @@ public:
     ~ICMPRequestWorkerPrivate() = default;
 };
 
-ICMPRequestWorker::ICMPRequestWorker(const QString &addr, QObject *parent /*= nullptr*/)
+net::ICMPRequestWorker::ICMPRequestWorker(const QString &addr, QObject *parent /*= nullptr*/)
     : QObject(parent)
     , d_ptr(new ICMPRequestWorkerPrivate(this))
 {
@@ -35,9 +35,9 @@ ICMPRequestWorker::ICMPRequestWorker(const QString &addr, QObject *parent /*= nu
     d->_addr = addr;
 }
 
-ICMPRequestWorker::~ICMPRequestWorker() = default;
+net::ICMPRequestWorker::~ICMPRequestWorker() = default;
 
-void ICMPRequestWorker::send_request()
+void net::ICMPRequestWorker::send_request()
 {
     Q_D(ICMPRequestWorker);
 

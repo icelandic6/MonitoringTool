@@ -4,7 +4,10 @@
 
 #include "ServerStatus.h"
 
-class ServerMonitor;
+namespace net
+{
+    class ServerMonitor;
+}
 
 namespace core
 {
@@ -14,7 +17,7 @@ namespace core
         Q_OBJECT
 
     public:
-        Server(const QString &name, ServerMonitor *monitor, QObject *parent = nullptr);
+        Server(const QString &name, net::ServerMonitor *monitor, QObject *parent = nullptr);
         ~Server();
 
         void runCheck();

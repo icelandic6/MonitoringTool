@@ -2,7 +2,7 @@
 
 #include <QtNetwork/QUdpSocket>
 
-class UDPServerMonitorPrivate : public QObject
+class net::UDPServerMonitorPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(UDPServerMonitor)
     Q_DISABLE_COPY(UDPServerMonitorPrivate)
@@ -20,7 +20,7 @@ public:
     ~UDPServerMonitorPrivate() = default;
 };
 
-UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObject *parent)
+net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObject *parent)
     : ServerMonitor(address, parent)
     , d_ptr(new UDPServerMonitorPrivate(this))
 {
@@ -47,9 +47,9 @@ UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObject *pa
             this, SLOT(onError(QAbstractSocket::SocketError)));
 }
 
-UDPServerMonitor::~UDPServerMonitor() = default;
+net::UDPServerMonitor::~UDPServerMonitor() = default;
 
-void UDPServerMonitor::checkServer()
+void net::UDPServerMonitor::checkServer()
 {
     Q_D(UDPServerMonitor);
 
@@ -60,7 +60,7 @@ void UDPServerMonitor::checkServer()
     d->_socket->connectToHost(address(), d->_port);
 }
 
-void UDPServerMonitor::onError(QAbstractSocket::SocketError socketError)
+void net::UDPServerMonitor::onError(QAbstractSocket::SocketError socketError)
 {
 //     qDebug() << QString("==== UDP CHECK: ERROR [%1]").arg(socketError);
     Q_D(UDPServerMonitor);

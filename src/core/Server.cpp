@@ -1,10 +1,8 @@
 #include "Server.h"
 #include "AppSettings.h"
-
 #include "net/ServerMonitor.h"
-#include "net/TCPServerMonitor.h"
-#include "net/UDPServerMonitor.h"
-#include "net/ICMPServerMonitor.h"
+
+#include <QDebug>
 
 static ushort nextId = 0;
 
@@ -18,7 +16,7 @@ class core::ServerPrivate : public QObject
     QString _name;
     ServerStatus _status = ServerStatus::Available;
     ServerStatus _prevStatus = ServerStatus::Available;
-    ServerMonitor* _monitor;
+    net::ServerMonitor* _monitor;
 
     short _stability = 0;
     short _sensitivity;
@@ -102,7 +100,7 @@ public:
     }
 };
 
-core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *parent)
+core::Server::Server(const QString &name, net::ServerMonitor *monitor, QObject *parent)
     : QObject(parent)
     , d_ptr(new ServerPrivate(this))
 {
@@ -113,7 +111,7 @@ core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *paren
     d->_monitor = monitor;
     d->_sensitivity = AppSettings::instance()->sensitivity();
 
-    connect(d->_monitor, &ServerMonitor::finished, d, &ServerPrivate::handleCheck);
+    connect(d->_monitor, &net::ServerMonitor::finished, d, &ServerPrivate::handleCheck);
 }
 
 core::Server::~Server() = default;
