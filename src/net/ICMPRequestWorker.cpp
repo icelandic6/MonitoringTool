@@ -1,22 +1,22 @@
 #include "ICMPRequestWorker.h"
 
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "IPHLPAPI.lib")
+
 #include "winsock2.h"
 #include "iphlpapi.h"
 #include "icmpapi.h"
 
-#include <QtNetwork/QTcpSocket>
-#include <QTimer>
-#include <QThread>
+#include <chrono>
 
-
-class ICMPRequestWorkerPrivate : public QObject
+class net::ICMPRequestWorkerPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(ICMPRequestWorker)
     Q_DISABLE_COPY(ICMPRequestWorkerPrivate)
     ICMPRequestWorker *q_ptr = nullptr;
 
-    ICMPMessage _message;
-    int _timeout;
+    const int _timeout = 3000;
+    QString _addr;
 
 public:
     explicit ICMPRequestWorkerPrivate(ICMPRequestWorker *q)
@@ -27,35 +27,44 @@ public:
     ~ICMPRequestWorkerPrivate() = default;
 };
 
-ICMPRequestWorker::ICMPRequestWorker(ICMPMessage message, int timeout /*= 1000*/, QObject *parent /*= nullptr*/)
+net::ICMPRequestWorker::ICMPRequestWorker(const QString &addr, QObject *parent /*= nullptr*/)
     : QObject(parent)
     , d_ptr(new ICMPRequestWorkerPrivate(this))
 {
     Q_D(ICMPRequestWorker);
-
-    d->_message = message;
-    d->_timeout = timeout;
+    d->_addr = addr;
 }
 
-ICMPRequestWorker::~ICMPRequestWorker()
-{
-}
+net::ICMPRequestWorker::~ICMPRequestWorker() = default;
 
-void ICMPRequestWorker::send_request()
+void net::ICMPRequestWorker::send_request()
 {
     Q_D(ICMPRequestWorker);
 
+    auto hIcmpFile = IcmpCreateFile();
+    unsigned long ipaddr = inet_addr(d->_addr.toStdString().c_str());
+    char SendData[32] = "Data Buffer";
+    DWORD ReplySize = sizeof(ICMP_ECHO_REPLY) + sizeof(SendData);
+    LPVOID ReplyBuffer = (VOID*)malloc(ReplySize);
+
+    auto timeStart = std::chrono::high_resolution_clock::now();
+
     DWORD dwRetVal = IcmpSendEcho(
-        d->_message.hIcmpFile,
-        d->_message.ipaddr,
-        d->_message.SendData,
-        sizeof(d->_message.SendData),
+        hIcmpFile,
+        ipaddr,
+        SendData,
+        sizeof(SendData),
         NULL,
-        d->_message.ReplyBuffer,
-        d->_message.ReplySize,
+        ReplyBuffer,
+        ReplySize,
         d->_timeout);
 
-    free(d->_message.ReplyBuffer);
+    auto timeEnd = std::chrono::high_resolution_clock::now();
+    auto latency = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
 
-    emit ready(dwRetVal != 0);
+    free(ReplyBuffer);
+
+    IcmpCloseHandle(hIcmpFile);
+
+    emit ready(dwRetVal != 0, dwRetVal == 0 ? 0 : latency);
 }

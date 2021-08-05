@@ -5,17 +5,6 @@
 
 namespace core
 {
-    struct AppConfig
-    {
-        QColor backgroundColor;
-        QColor greenColor;
-        QColor yellowColor;
-        QColor redColor;
-
-        int frequencySeconds;
-        int sensitivity;
-    };
-
     struct ServerInfo
     {
         QString name;
@@ -26,19 +15,25 @@ namespace core
     class AppSettingsPrivate;
     class AppSettings : public QObject
     {
-        Q_OBJECT
     public:
         ~AppSettings();
 
+        static AppSettings *instance();
+
         void readFile(const QString &iniFileName);
 
-        const AppConfig &config() const;
+        QColor backgroundColor() const;
+        QColor greenColor() const;
+        QColor yellowColor() const;
+        QColor redColor() const;
 
-        static AppSettings *instance();
-        QList<ServerInfo> serversInfo();
+        int frequencySeconds() const;
+        int sensitivity() const;
+
+        QList<ServerInfo> serversInfo() const;
 
     private:
-        explicit AppSettings();
+        AppSettings();
 
     private:
         QScopedPointer<AppSettingsPrivate> d_ptr;

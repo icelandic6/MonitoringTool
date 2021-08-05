@@ -3,10 +3,19 @@
 #include <QSettings>
 #include <QFile>
 #include <QMessageBox>
+#include <QTextStream>
 #include <QApplication>
 
-#include <QDebug>
+struct AppConfig
+{
+    QColor backgroundColor;
+    QColor greenColor;
+    QColor yellowColor;
+    QColor redColor;
 
+    int frequencySeconds;
+    int sensitivity;
+};
 
 class core::AppSettingsPrivate : public QObject
 {
@@ -17,8 +26,8 @@ class core::AppSettingsPrivate : public QObject
     QString _filename;
     AppConfig _config;
 
-    int _defaultFrequency = 15;
-    int _defaultSensitivity = 3;
+    const int _defaultFrequency = 15;
+    const int _defaultSensitivity = 3;
 
 public:
     explicit AppSettingsPrivate(AppSettings *q)
@@ -49,20 +58,20 @@ public:
         settings.endGroup();
     }
 
-    QList<ServerInfo> readServersInfo()
+    QList<ServerInfo> readServersInfo() const
     {
         QList<ServerInfo> servers;
 
         QFile f(_filename);
         if (f.open(QIODevice::ReadOnly))
         {
-
-            QTextStream in(&f);
+            QTextStream inStream(&f);
             bool resources = false;
             bool failed = false;
-            while (!in.atEnd())
+
+            while (!inStream.atEnd())
             {
-                QString line = in.readLine();
+                auto line = inStream.readLine();
                 if (line == "[resources]")
                 {
                     resources = true;
@@ -73,6 +82,9 @@ public:
                     continue;
 
                 QStringList addr = line.simplified().split(" ");
+                if (addr.size() == 1 && addr.first().isEmpty())
+                    continue;
+
                 if (addr.size() != 3)
                 {
                     failed = true;
@@ -87,6 +99,7 @@ public:
             }
 
             f.close();
+
             if (failed)
             {
                 QMessageBox::warning(nullptr, QString("Monitoring Tool"),
@@ -106,10 +119,10 @@ public:
     }
 };
 
-
 core::AppSettings::AppSettings()
     : d_ptr(new AppSettingsPrivate(this))
 {
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &AppSettings::deleteLater);
 }
 
 core::AppSettings::~AppSettings() = default;
@@ -122,11 +135,46 @@ void core::AppSettings::readFile(const QString &iniFileName)
     d->readSettings();
 }
 
-const core::AppConfig & core::AppSettings::config() const
+QColor core::AppSettings::backgroundColor() const
 {
     Q_D(const AppSettings);
 
-    return d->_config;
+    return d->_config.backgroundColor;
+}
+
+QColor core::AppSettings::greenColor() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config.greenColor;
+}
+
+QColor core::AppSettings::yellowColor() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config.yellowColor;
+}
+
+QColor core::AppSettings::redColor() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config.redColor;
+}
+
+int core::AppSettings::frequencySeconds() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config.frequencySeconds;
+}
+
+int core::AppSettings::sensitivity() const
+{
+    Q_D(const AppSettings);
+
+    return d->_config.sensitivity;
 }
 
 core::AppSettings* core::AppSettings::instance()
@@ -138,9 +186,9 @@ core::AppSettings* core::AppSettings::instance()
     return _instance;
 }
 
-QList<core::ServerInfo> core::AppSettings::serversInfo()
+QList<core::ServerInfo> core::AppSettings::serversInfo() const
 {
-    Q_D(AppSettings);
+    Q_D(const AppSettings);
 
     return d->readServersInfo();
 }

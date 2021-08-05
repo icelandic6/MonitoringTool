@@ -3,21 +3,17 @@
 #include "core/AppSettings.h"
 #include "core/ServerStatus.h"
 
-#include <QColor>
-
 namespace ui
 {
     inline QColor statusColor(core::ServerStatus status)
     {
-        auto settings = core::AppSettings::instance();
-
         if (status == core::ServerStatus::Available)
-            return settings->config().greenColor;
+            return core::AppSettings::instance()->greenColor();
         else if (status == core::ServerStatus::Unstable)
-            return settings->config().yellowColor;
+            return core::AppSettings::instance()->yellowColor();
         else if (status == core::ServerStatus::Failed)
-            return settings->config().redColor;
+            return core::AppSettings::instance()->redColor();
 
-        return QColor(Qt::black);
+        return Qt::black;
     }
 }

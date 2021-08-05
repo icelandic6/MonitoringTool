@@ -9,17 +9,19 @@ namespace ui
     class ServerStatusWidgetPrivate;
     class ServerStatusWidget : public QWidget
     {
-        Q_OBJECT
     public:
         ServerStatusWidget(const QString &name, QWidget *parent = nullptr);
-        virtual ~ServerStatusWidget() override;
+        ~ServerStatusWidget() override;
+
+        QString name() const;
 
         void setStatus(core::ServerStatus status);
+        void setLatency(int latency);
 
         static int cellSize();
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
 
     private:
         QScopedPointer<ServerStatusWidgetPrivate> d_ptr;

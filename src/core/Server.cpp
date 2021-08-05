@@ -1,10 +1,8 @@
 #include "Server.h"
 #include "AppSettings.h"
-
 #include "net/ServerMonitor.h"
-#include "net/TCPServerMonitor.h"
-#include "net/UDPServerMonitor.h"
-#include "net/ICMPServerMonitor.h"
+
+#include <QDebug>
 
 static ushort nextId = 0;
 
@@ -18,9 +16,9 @@ class core::ServerPrivate : public QObject
     QString _name;
     ServerStatus _status = ServerStatus::Available;
     ServerStatus _prevStatus = ServerStatus::Available;
-    ServerMonitor* _monitor;
+    net::ServerMonitor* _monitor;
 
-    short _cur = 0;
+    short _stability = 0;
     short _sensitivity;
 
 public:
@@ -31,27 +29,33 @@ public:
 
     ~ServerPrivate() = default;
 
-    void handleCheck(bool success)
+    void handleCheck(bool success, int latency = 0)
     {
         qDebug() << QString("==== Server check [%1]: %2").arg(_name).arg(success);
+
+        if (latency != 0)
+        {
+            Q_Q(Server);
+            emit q->latencyChanged(latency);
+        }
 
         if ((success && _status == ServerStatus::Available) ||
             (!success && _status == ServerStatus::Failed))
         {
-            _cur = 0;
+            _stability = 0;
             return;
         }
 
-        if (_cur < 0 && success)
-            _cur = 1;
-        else if (_cur > 0 && !success)
-            _cur = -1;
+        if (_stability < 0 && success)
+            _stability = 1;
+        else if (_stability > 0 && !success)
+            _stability = -1;
         else
-            _cur += success ? 1 : -1;
+            _stability += success ? 1 : -1;
 
-        if (_cur >= _sensitivity)
+        if (_stability >= _sensitivity)
             raiseStatus();
-        else if (_cur <= (-_sensitivity))
+        else if (_stability <= (-_sensitivity))
             lowerStatus();
     }
 
@@ -69,6 +73,8 @@ public:
             _prevStatus = _status;
             _status = ServerStatus::Unstable;
         }
+
+        _stability = 0;
 
         emit q->statusChanged();
     }
@@ -88,11 +94,13 @@ public:
             _status = ServerStatus::Unstable;
         }
 
+        _stability = 0;
+
         emit q->statusChanged();
     }
 };
 
-core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *parent)
+core::Server::Server(const QString &name, net::ServerMonitor *monitor, QObject *parent)
     : QObject(parent)
     , d_ptr(new ServerPrivate(this))
 {
@@ -101,9 +109,9 @@ core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *paren
     d->_id = ::nextId++;
     d->_name = name;
     d->_monitor = monitor;
-    d->_sensitivity = AppSettings::instance()->config().sensitivity;
+    d->_sensitivity = AppSettings::instance()->sensitivity();
 
-    connect(d->_monitor, &ServerMonitor::finished, d, &ServerPrivate::handleCheck);
+    connect(d->_monitor, &net::ServerMonitor::finished, d, &ServerPrivate::handleCheck);
 }
 
 core::Server::~Server() = default;

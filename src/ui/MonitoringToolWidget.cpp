@@ -4,12 +4,10 @@
 #include "Separator.h"
 #include "StatusColor.h"
 
-#include <QPushButton>
 #include <QGridLayout>
-#include <QHostAddress>
-#include <QResizeEvent>
 #include <QPainter>
-#include <QApplication>
+#include <QMouseEvent>
+#include <QSystemTrayIcon>
 
 class ui::MonitoringToolWidgetPrivate : public QObject
 {
@@ -32,6 +30,7 @@ class ui::MonitoringToolWidgetPrivate : public QObject
     QGridLayout *_mainLayout = nullptr;
 
     QSystemTrayIcon *_trayIcon = nullptr;
+    ushort _trayIconServerId = 0;
 
     QPoint _movePosition;
 
@@ -72,7 +71,9 @@ private:
 
     void createSystemTrayIcon()
     {
-        _trayIcon = new QSystemTrayIcon(this);
+        Q_Q(MonitoringToolWidget);
+
+        _trayIcon = new QSystemTrayIcon(q);
     }
 
     void addServers(const QMap<ushort, QString> &serversInfo)
@@ -202,7 +203,7 @@ public:
         q->setWindowState(Qt::WindowActive);
     }
 
-    void setTrayServer(const QString &name, core::ServerStatus status)
+    void setTrayServerStatus(core::ServerStatus status)
     {
         Q_Q(MonitoringToolWidget);
 
@@ -218,7 +219,6 @@ public:
         painter.drawEllipse(QPointF(trayPixmap.width() / 2, trayPixmap.height() / 2), 7, 7);
 
         _trayIcon->setIcon(QIcon(trayPixmap));
-        _trayIcon->setToolTip(name);
 
         if (!_trayIcon->isVisible())
             _trayIcon->show();
@@ -232,10 +232,10 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
 {
     Q_D(MonitoringToolWidget);
 
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::SubWindow);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    d->_backgroundColor = core::AppSettings::instance()->config().backgroundColor;
+    d->_backgroundColor = core::AppSettings::instance()->backgroundColor();
 
     d->addServers(serversInfo);
     d->createSeparator();
@@ -251,6 +251,16 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
 
 ui::MonitoringToolWidget::~MonitoringToolWidget() = default;
 
+void ui::MonitoringToolWidget::setServerLatency(ushort serverId, int latency)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (!d->_statusWidgets.contains(serverId))
+        return;
+
+    d->_statusWidgets[serverId]->setLatency(latency);
+}
+
 void ui::MonitoringToolWidget::setServerStatus(ushort serverId, core::ServerStatus status)
 {
     Q_D(MonitoringToolWidget);
@@ -261,11 +271,31 @@ void ui::MonitoringToolWidget::setServerStatus(ushort serverId, core::ServerStat
     d->_statusWidgets[serverId]->setStatus(status);
 }
 
-void ui::MonitoringToolWidget::setTrayServerStatus(const QString &name, core::ServerStatus status)
+void ui::MonitoringToolWidget::setTrayServerStatus(ushort serverId, core::ServerStatus status)
 {
     Q_D(MonitoringToolWidget);
 
-    d->setTrayServer(name, status);
+    if (!d->_statusWidgets.contains(serverId))
+        return;
+
+    d->_trayIconServerId = serverId;
+
+    d->setTrayServerStatus(status);
+}
+
+void ui::MonitoringToolWidget::setTrayServerTooltip(ushort serverId, int latency)
+{
+    Q_D(MonitoringToolWidget);
+
+    if (!d->_statusWidgets.contains(serverId) || d->_trayIconServerId != serverId)
+        return;
+
+    QString tooltip = d->_statusWidgets[serverId]->name();
+    if (latency)
+        tooltip += QString(" %1ms").arg(latency);
+
+    if (d->_trayIcon->toolTip() != tooltip)
+        d->_trayIcon->setToolTip(tooltip);
 }
 
 QSize ui::MonitoringToolWidget::sizeHint() const

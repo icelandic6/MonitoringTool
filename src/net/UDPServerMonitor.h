@@ -1,26 +1,29 @@
 #pragma once
 
 #include <QObject>
-#include <QHostAddress>
+#include <QAbstractSocket>
 
 #include "ServerMonitor.h"
 
-class UDPServerMonitorPrivate;
-class UDPServerMonitor : public ServerMonitor
+namespace net
 {
-    Q_OBJECT
+    class UDPServerMonitorPrivate;
+    class UDPServerMonitor : public ServerMonitor
+    {
+        Q_OBJECT
 
-public:
-    UDPServerMonitor(const QString &address, int port, QObject *parent);
-    virtual ~UDPServerMonitor() override;
+    public:
+        UDPServerMonitor(const QString &address, int port, QObject *parent);
+        ~UDPServerMonitor() override;
 
-    void checkServer() override;
+        void checkServer() override;
 
-public slots:
-    void onError(QAbstractSocket::SocketError socketError);
+    public slots:
+        void onError(QAbstractSocket::SocketError socketError);
 
-private:
-    QScopedPointer<UDPServerMonitorPrivate> d_ptr;
-    Q_DISABLE_COPY(UDPServerMonitor)
-    Q_DECLARE_PRIVATE(UDPServerMonitor)
-};
+    private:
+        QScopedPointer<UDPServerMonitorPrivate> d_ptr;
+        Q_DISABLE_COPY(UDPServerMonitor)
+        Q_DECLARE_PRIVATE(UDPServerMonitor)
+    };
+}

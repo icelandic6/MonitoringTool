@@ -1,29 +1,23 @@
 #include "ServerMonitor.h"
 
-#include <QtNetwork/QTcpSocket>
-
-class ServerMonitorPrivate : public QObject
+class net::ServerMonitorPrivate : public QObject
 {
-	Q_DECLARE_PUBLIC(ServerMonitor)
-	Q_DISABLE_COPY(ServerMonitorPrivate)
-	ServerMonitor *q_ptr = nullptr;
+    Q_DECLARE_PUBLIC(ServerMonitor)
+    Q_DISABLE_COPY(ServerMonitorPrivate)
+    ServerMonitor *q_ptr = nullptr;
 
     QString _address;
 
 public:
-	explicit ServerMonitorPrivate(ServerMonitor *q)
-		: q_ptr(q)
-	{
-	}
+    explicit ServerMonitorPrivate(ServerMonitor *q)
+        : q_ptr(q)
+    {
+    }
 
-	~ServerMonitorPrivate() = default;
+    ~ServerMonitorPrivate() = default;
 };
 
-// ServerMonitor::ServerMonitor(QHostAddress address, QObject *parent)
-// {
-// }
-
-ServerMonitor::ServerMonitor(const QString &address, QObject *parent)
+net::ServerMonitor::ServerMonitor(const QString &address, QObject *parent)
     : QObject(parent)
     , d_ptr(new ServerMonitorPrivate(this))
 {
@@ -32,9 +26,9 @@ ServerMonitor::ServerMonitor(const QString &address, QObject *parent)
     d->_address = address;
 }
 
-ServerMonitor::~ServerMonitor() = default;
+net::ServerMonitor::~ServerMonitor() = default;
 
-QString ServerMonitor::address() const
+QString net::ServerMonitor::address() const
 {
     Q_D(const ServerMonitor);
 

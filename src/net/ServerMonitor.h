@@ -1,34 +1,28 @@
 #pragma once
 
 #include <QObject>
-#include <QHostAddress>
 
-enum class ServerProtocol
+namespace net
 {
-    TCP,
-    UDP,
-    ICMP,
-};
+    class ServerMonitorPrivate;
+    class ServerMonitor : public QObject
+    {
+        Q_OBJECT
 
-class ServerMonitorPrivate;
-class ServerMonitor : public QObject
-{
-    Q_OBJECT
+    public:
+        ServerMonitor(const QString &address, QObject *parent);
+        ~ServerMonitor();
 
-public:
-//     ServerMonitor(QString name, QHostAddress hostAddress, QObject *parent);
-    ServerMonitor(const QString &address, QObject *parent);
-    virtual ~ServerMonitor();
+        QString address() const;
 
-    QString address() const;
+        virtual void checkServer() = 0;
 
-    virtual void checkServer() = 0;
+    signals:
+        void finished(bool success, int latency = 0);
 
-signals:
-    void finished(bool success);
-
-private:
-    QScopedPointer<ServerMonitorPrivate> d_ptr;
-    Q_DISABLE_COPY(ServerMonitor)
-    Q_DECLARE_PRIVATE(ServerMonitor)
-};
+    private:
+        QScopedPointer<ServerMonitorPrivate> d_ptr;
+        Q_DISABLE_COPY(ServerMonitor)
+        Q_DECLARE_PRIVATE(ServerMonitor)
+    };
+}

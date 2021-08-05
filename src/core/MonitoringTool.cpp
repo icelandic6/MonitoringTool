@@ -41,18 +41,33 @@ private:
     {
         _monitoringWidget = new ui::MonitoringToolWidget(info);
         _monitoringWidget->show();
-        _monitoringWidget->setTrayServerStatus(info.first(), core::ServerStatus::Available);
+        _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
     }
 
 public:
+    void updateServerStatus(ushort id, core::ServerStatus status)
+    {
+        _monitoringWidget->setServerStatus(id, status);
+    }
+
+    void updateServerLatency(ushort id, int latency)
+    {
+        _monitoringWidget->setServerLatency(id, latency);
+    }
+
+    void updateTrayIconStatus(ushort id, core::ServerStatus status)
+    {
+        _monitoringWidget->setTrayServerStatus(id, status);
+    }
+
+    void updateTrayIconTooltip(ushort id, int latency)
+    {
+        _monitoringWidget->setTrayServerTooltip(id, latency);
+    }
+
     void minimizeApp()
     {
         _monitoringWidget->setWindowState(Qt::WindowMinimized);
-    }
-
-    void updateTrayIcon(const QString &name, core::ServerStatus status)
-    {
-        _monitoringWidget->setTrayServerStatus(name, status);
     }
 
     void closeApp()
@@ -92,18 +107,12 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     d->createMonitorWidget(idNames);
 
     connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, d, &MonitoringToolPrivate::closeApp);
-    connect(d->_serversManager, &ServersManager::serverStatusUpdated, this, [this](ushort serverId, ServerStatus status)
-    {
-        Q_D(MonitoringTool);
+    connect(d->_serversManager, &ServersManager::serverStatusUpdated, d, &MonitoringToolPrivate::updateServerStatus);
+    connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIconStatus);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconTooltip);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateServerLatency);
 
-        //TODO: remove this lambda after debugging
-        d->_monitoringWidget->setServerStatus(serverId, status);
-
-        QString s = (status == ServerStatus::Available) ? "AVAILABLE" : ((status == ServerStatus::Unstable) ? "UNSTABLE" : "FAILED");
-
-        qDebug() << "====== MonitoringTool: server [" << serverId << "] status updated to " << s << "]\n";
-    });
-    connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIcon);
+    d->_serversManager->startMonitoring();
 }
 
 core::MonitoringTool::~MonitoringTool()

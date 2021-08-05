@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QWidget>
-#include <QSystemTrayIcon>
 
 #include "core/ServerStatus.h"
 
@@ -16,16 +15,19 @@ namespace ui
         MonitoringToolWidget(const QMap<ushort, QString> &serversInfo, QWidget *parent = nullptr);
         ~MonitoringToolWidget();
 
+        void setServerLatency(ushort serverId, int latency);
         void setServerStatus(ushort serverId, core::ServerStatus status);
-        void setTrayServerStatus(const QString &name, core::ServerStatus status);
+
+        void setTrayServerStatus(ushort serverId, core::ServerStatus status);
+        void setTrayServerTooltip(ushort serverId, int latency = 0);
 
         QSize sizeHint() const override;
 
     protected:
-        virtual void paintEvent(QPaintEvent *event) override;
-        virtual void mousePressEvent(QMouseEvent *event) override;
-        virtual void mouseMoveEvent(QMouseEvent *event) override;
-        virtual void mouseReleaseEvent(QMouseEvent *event) override;
+        void paintEvent(QPaintEvent *event) override;
+        void mousePressEvent(QMouseEvent *event) override;
+        void mouseMoveEvent(QMouseEvent *event) override;
+        void mouseReleaseEvent(QMouseEvent *event) override;
 
     signals:
         void closeApp();

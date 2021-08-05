@@ -7,8 +7,6 @@ namespace core
     class MonitoringToolPrivate;
     class MonitoringTool : public QObject
     {
-        Q_OBJECT
-
     public:
         explicit MonitoringTool(QObject *parent = nullptr);
         ~MonitoringTool();

@@ -140,14 +140,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ui\StatusColor.h" />
-    <QtMoc Include="src\ui\Separator.h" />
-    <QtMoc Include="src\ui\ServerStatusWidget.h" />
-    <QtMoc Include="src\core\MonitoringTool.h" />
+    <ClInclude Include="src\ui\Separator.h" />
+    <ClInclude Include="src\ui\ServerStatusWidget.h" />
+    <ClInclude Include="src\core\MonitoringTool.h" />
     <QtMoc Include="src\core\ServersManager.h" />
     <QtMoc Include="src\core\Server.h" />
-    <QtMoc Include="src\core\AppSettings.h" />
+    <ClInclude Include="src\core\AppSettings.h" />
     <ClInclude Include="src\core\ServerStatus.h" />
-    <ClInclude Include="src\net\ICMPMessage.h" />
     <QtMoc Include="src\ui\ControlButton.h" />
     <QtMoc Include="src\net\ICMPRequestWorker.h" />
   </ItemGroup>

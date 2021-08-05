@@ -14,8 +14,7 @@ namespace ui
         static int buttonSize();
 
     protected:
-        virtual void mouseReleaseEvent(QMouseEvent *event) override;
-        virtual void paintEvent(QPaintEvent *event) override;
+        void mouseReleaseEvent(QMouseEvent *event) override;
 
     signals:
         void clicked();

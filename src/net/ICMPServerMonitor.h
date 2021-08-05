@@ -5,19 +5,22 @@
 
 #include "ServerMonitor.h"
 
-class ICMPServerMonitorPrivate;
-class ICMPServerMonitor : public ServerMonitor
+namespace net
 {
-    Q_OBJECT
+    class ICMPServerMonitorPrivate;
+    class ICMPServerMonitor : public ServerMonitor
+    {
+        Q_OBJECT
 
-public:
-    ICMPServerMonitor(const QString &address, QObject *parent);
-    virtual ~ICMPServerMonitor() override;
+    public:
+        ICMPServerMonitor(const QString &address, QObject *parent);
+        ~ICMPServerMonitor() override;
 
-    void checkServer() override;
+        void checkServer() override;
 
-private:
-    QScopedPointer<ICMPServerMonitorPrivate> d_ptr;
-    Q_DISABLE_COPY(ICMPServerMonitor)
-    Q_DECLARE_PRIVATE(ICMPServerMonitor)
-};
+    private:
+        QScopedPointer<ICMPServerMonitorPrivate> d_ptr;
+        Q_DISABLE_COPY(ICMPServerMonitor)
+        Q_DECLARE_PRIVATE(ICMPServerMonitor)
+    };
+}

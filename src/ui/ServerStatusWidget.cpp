@@ -4,7 +4,6 @@
 
 #include <QPaintEvent>
 #include <QPainter>
-#include <QDebug>
 
 static int cellSize = 40;
 
@@ -17,7 +16,7 @@ class ui::ServerStatusWidgetPrivate : public QObject
     QString _name;
 
     QColor _color;
-    qreal _radius = 11.5;
+    const qreal _radius = 11.5;
 
 public:
     explicit ServerStatusWidgetPrivate(ServerStatusWidget *q)
@@ -44,12 +43,28 @@ ui::ServerStatusWidget::ServerStatusWidget(const QString &name, QWidget *parent)
 
 ui::ServerStatusWidget::~ServerStatusWidget() = default;
 
+QString ui::ServerStatusWidget::name() const
+{
+    Q_D(const ServerStatusWidget);
+
+    return d->_name;
+}
+
 void ui::ServerStatusWidget::setStatus(core::ServerStatus status)
 {
     Q_D(ServerStatusWidget);
 
     d->_color = ui::statusColor(status);
     update();
+}
+
+void ui::ServerStatusWidget::setLatency(int latency)
+{
+    Q_D(ServerStatusWidget);
+
+    auto tooltip = QString("%1 %2ms").arg(d->_name).arg(latency);
+    if (tooltip != this->toolTip())
+        setToolTip(tooltip);
 }
 
 void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
@@ -60,8 +75,6 @@ void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setBrush(d->_color);
     painter.setPen(d->_color);
-
-    painter.fillRect(rect(), QColor(100, 100, 200, 100));
     painter.drawEllipse(QPointF(rect().width() / 2, rect().height() / 2), d->_radius, d->_radius);
 
     QWidget::paintEvent(event);
