@@ -12,7 +12,7 @@ class TCPServerMonitorPrivate : public QObject
     QAbstractSocket* _socket = nullptr;
     int _port = 0;
 
-    const int _connectionTimeout = 5000;
+    const int _connectionTimeout = 8000;
     QTimer _timeoutTimer;
 
 public:
@@ -76,6 +76,8 @@ void TCPServerMonitor::checkServer()
     Q_D(TCPServerMonitor);
 
     qDebug() << "\n==== Running TCP server check";
+    if (d->_timeoutTimer.isActive() && d->_socket->state() == QAbstractSocket::SocketState::ConnectingState)
+        emit finished(false);
     d->_timeoutTimer.stop();
     d->_socket->abort();
 
