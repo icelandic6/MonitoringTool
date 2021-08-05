@@ -76,8 +76,6 @@ void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setBrush(d->_color);
     painter.setPen(d->_color);
-
-    painter.fillRect(rect(), QColor(100, 100, 200, 100));
     painter.drawEllipse(QPointF(rect().width() / 2, rect().height() / 2), d->_radius, d->_radius);
 
     QWidget::paintEvent(event);

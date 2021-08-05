@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QWidget>
-#include <QSystemTrayIcon>
 
 #include "core/ServerStatus.h"
 
@@ -17,8 +16,8 @@ namespace ui
         ~MonitoringToolWidget();
 
         void setServerLatency(ushort serverId, int latency);
-
         void setServerStatus(ushort serverId, core::ServerStatus status);
+
         void setTrayServerStatus(ushort serverId, core::ServerStatus status);
         void setTrayServerTooltip(ushort serverId, int latency = 0);
 

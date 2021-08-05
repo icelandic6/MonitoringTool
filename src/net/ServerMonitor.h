@@ -9,7 +9,7 @@ class ServerMonitor : public QObject
 
 public:
     ServerMonitor(const QString &address, QObject *parent);
-    virtual ~ServerMonitor();
+    ~ServerMonitor();
 
     QString address() const;
 

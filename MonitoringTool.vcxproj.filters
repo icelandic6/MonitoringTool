@@ -92,9 +92,6 @@
     <QtMoc Include="src\ui\ControlButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\core\MonitoringTool.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="src\core\Server.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -107,15 +104,18 @@
     <QtMoc Include="src\ui\Separator.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\core\AppSettings.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\ServerStatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ui\StatusColor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\AppSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\MonitoringTool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

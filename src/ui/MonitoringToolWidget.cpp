@@ -4,12 +4,10 @@
 #include "Separator.h"
 #include "StatusColor.h"
 
-#include <QPushButton>
 #include <QGridLayout>
-#include <QHostAddress>
-#include <QResizeEvent>
 #include <QPainter>
-#include <QApplication>
+#include <QMouseEvent>
+#include <QSystemTrayIcon>
 
 class ui::MonitoringToolWidgetPrivate : public QObject
 {
@@ -73,7 +71,9 @@ private:
 
     void createSystemTrayIcon()
     {
-        _trayIcon = new QSystemTrayIcon(this);
+        Q_Q(MonitoringToolWidget);
+
+        _trayIcon = new QSystemTrayIcon(q);
     }
 
     void addServers(const QMap<ushort, QString> &serversInfo)
