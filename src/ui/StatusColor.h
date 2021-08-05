@@ -12,11 +12,11 @@ namespace ui
         auto settings = core::AppSettings::instance();
 
         if (status == core::ServerStatus::Available)
-            return settings->config().greenColor;
+            return settings->greenColor();
         else if (status == core::ServerStatus::Unstable)
-            return settings->config().yellowColor;
+            return settings->yellowColor();
         else if (status == core::ServerStatus::Failed)
-            return settings->config().redColor;
+            return settings->redColor();
 
         return QColor(Qt::black);
     }

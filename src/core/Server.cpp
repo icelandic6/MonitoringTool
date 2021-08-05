@@ -107,7 +107,7 @@ core::Server::Server(const QString &name, ServerMonitor *monitor, QObject *paren
     d->_id = ::nextId++;
     d->_name = name;
     d->_monitor = monitor;
-    d->_sensitivity = AppSettings::instance()->config().sensitivity;
+    d->_sensitivity = AppSettings::instance()->sensitivity();
 
     connect(d->_monitor, &ServerMonitor::finished, d, &ServerPrivate::handleCheck);
 }

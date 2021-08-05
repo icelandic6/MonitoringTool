@@ -142,7 +142,7 @@ void core::ServersManager::startMonitoring()
 {
     Q_D(ServersManager);
 
-    d->_timer.setInterval(AppSettings::instance()->config().frequencySeconds * 1000);
+    d->_timer.setInterval(AppSettings::instance()->frequencySeconds() * 1000);
     d->_timer.setSingleShot(false);
     d->_timer.start();
 }

@@ -235,7 +235,7 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
 
-    d->_backgroundColor = core::AppSettings::instance()->config().backgroundColor;
+    d->_backgroundColor = core::AppSettings::instance()->backgroundColor();
 
     d->addServers(serversInfo);
     d->createSeparator();
