@@ -20,7 +20,7 @@ class core::ServerPrivate : public QObject
     ServerStatus _prevStatus = ServerStatus::Available;
     ServerMonitor* _monitor;
 
-    short _cur = 0;
+    short _stability = 0;
     short _sensitivity;
 
 public:
@@ -44,20 +44,20 @@ public:
         if ((success && _status == ServerStatus::Available) ||
             (!success && _status == ServerStatus::Failed))
         {
-            _cur = 0;
+            _stability = 0;
             return;
         }
 
-        if (_cur < 0 && success)
-            _cur = 1;
-        else if (_cur > 0 && !success)
-            _cur = -1;
+        if (_stability < 0 && success)
+            _stability = 1;
+        else if (_stability > 0 && !success)
+            _stability = -1;
         else
-            _cur += success ? 1 : -1;
+            _stability += success ? 1 : -1;
 
-        if (_cur >= _sensitivity)
+        if (_stability >= _sensitivity)
             raiseStatus();
-        else if (_cur <= (-_sensitivity))
+        else if (_stability <= (-_sensitivity))
             lowerStatus();
     }
 
@@ -76,6 +76,8 @@ public:
             _status = ServerStatus::Unstable;
         }
 
+        _stability = 0;
+
         emit q->statusChanged();
     }
 
@@ -93,6 +95,8 @@ public:
             _prevStatus = _status;
             _status = ServerStatus::Unstable;
         }
+
+        _stability = 0;
 
         emit q->statusChanged();
     }
