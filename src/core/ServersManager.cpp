@@ -67,8 +67,6 @@ public:
     {
         Q_Q(ServersManager);
 
-        qDebug() << "\n**** NEW WORST SERVER: [" << server->name() << "|" << (server->status() == ServerStatus::Available ? "AVAILABLE" : (server->status() == ServerStatus::Failed ? "FAILED" : "UNSTABLE")) << "]\n\n";
-
         _worstServer = server;
         emit q->worstServerUpdated(_worstServer->id(), _worstServer->status());
     }

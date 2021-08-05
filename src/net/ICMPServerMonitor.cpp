@@ -48,8 +48,6 @@ net::ICMPServerMonitor::ICMPServerMonitor(const QString &address, QObject *paren
 {
     Q_D(ICMPServerMonitor);
 
-    qDebug() << QString("\n====== ICMPServerMonitor: host address = [%1]\n").arg(address);
-
     d->_ipv4Address = QHostAddress(address);
 
     if (d->_ipv4Address.isNull())
@@ -64,8 +62,6 @@ net::ICMPServerMonitor::~ICMPServerMonitor() = default;
 void net::ICMPServerMonitor::checkServer()
 {
     Q_D(ICMPServerMonitor);
-
-    qDebug() << "\n====== Running ICMP server check ======";
 
     if (d->_ipv4Address.isNull())
     {

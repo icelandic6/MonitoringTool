@@ -24,8 +24,6 @@ net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObjec
     : ServerMonitor(address, parent)
     , d_ptr(new UDPServerMonitorPrivate(this))
 {
-    qDebug() << QString("====== UDPServerMonitor: host address = [%1]").arg(address);
-
     Q_D(UDPServerMonitor);
 
     d->_socket = new QUdpSocket(this);
@@ -36,8 +34,6 @@ net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObjec
     connect(d->_socket, &QUdpSocket::connected, this, [this]()
     {
         Q_D(UDPServerMonitor);
-
-//         qDebug() << QString("==== UDP CHECK: CONNECTED");
 
         d->_socket->close();
         emit finished(true);
@@ -53,16 +49,12 @@ void net::UDPServerMonitor::checkServer()
 {
     Q_D(UDPServerMonitor);
 
-    qDebug() << "\n==== Running UDP server check";
     d->_socket->abort();
-
-//     qDebug() << QString("==== UDP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
     d->_socket->connectToHost(address(), d->_port);
 }
 
 void net::UDPServerMonitor::onError(QAbstractSocket::SocketError socketError)
 {
-//     qDebug() << QString("==== UDP CHECK: ERROR [%1]").arg(socketError);
     Q_D(UDPServerMonitor);
 
     d->_socket->close();

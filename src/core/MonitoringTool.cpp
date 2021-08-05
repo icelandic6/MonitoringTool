@@ -6,7 +6,6 @@
 #include "ui/MonitoringToolWidget.h"
 
 #include <QApplication>
-#include <QDebug>
 
 class core::MonitoringToolPrivate : public QObject
 {

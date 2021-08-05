@@ -2,8 +2,6 @@
 #include "AppSettings.h"
 #include "net/ServerMonitor.h"
 
-#include <QDebug>
-
 static ushort nextId = 0;
 
 class core::ServerPrivate : public QObject
@@ -31,8 +29,6 @@ public:
 
     void handleCheck(bool success, int latency = 0)
     {
-        qDebug() << QString("==== Server check [%1]: %2").arg(_name).arg(success);
-
         if (latency != 0)
         {
             Q_Q(Server);

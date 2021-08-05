@@ -28,8 +28,6 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     : ServerMonitor(address, parent)
     , d_ptr(new TCPServerMonitorPrivate(this))
 {
-    qDebug() << QString("====== TCPServerMonitor: host address = [%1]").arg(address);
-
     Q_D(TCPServerMonitor);
 
     d->_timeoutTimer.setSingleShot(true);
@@ -44,7 +42,6 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     {
         Q_D(TCPServerMonitor);
 
-        qDebug() << QString("==== TCP CHECK: CONNECTED");
         d->_timeoutTimer.stop();
         d->_socket->abort();
 
@@ -58,11 +55,8 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     {
         Q_D(TCPServerMonitor);
 
-        qDebug() << QString("==== TCP CHECK: TIMEOUT");
-
         if (d->_socket->state() != QAbstractSocket::SocketState::ConnectedState)
         {
-            qDebug() << QString("==== TCP CHECK: TIMEOUT STATE = %1").arg(d->_socket->state());
             d->_socket->abort();
             emit finished(false);
         }
@@ -75,21 +69,17 @@ void net::TCPServerMonitor::checkServer()
 {
     Q_D(TCPServerMonitor);
 
-    qDebug() << "\n==== Running TCP server check";
     if (d->_timeoutTimer.isActive() && d->_socket->state() == QAbstractSocket::SocketState::ConnectingState)
         emit finished(false);
     d->_timeoutTimer.stop();
     d->_socket->abort();
 
-    qDebug() << QString("==== TCP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
     d->_socket->connectToHost(address(), d->_port);
     d->_timeoutTimer.start();
 }
 
 void net::TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
 {
-    qDebug() << QString("==== TCP CHECK: ERROR [%1]").arg(socketError);
-
     Q_D(TCPServerMonitor);
 
     if (!d->_timeoutTimer.isActive())
