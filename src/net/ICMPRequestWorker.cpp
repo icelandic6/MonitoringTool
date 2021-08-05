@@ -66,5 +66,5 @@ void ICMPRequestWorker::send_request()
 
     IcmpCloseHandle(hIcmpFile);
 
-    emit ready(dwRetVal != 0, latency);
+    emit ready(dwRetVal != 0, dwRetVal == 0 ? 0 : latency);
 }
