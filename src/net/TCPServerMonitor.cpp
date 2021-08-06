@@ -57,6 +57,7 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
 
         if (d->_socket->state() != QAbstractSocket::SocketState::ConnectedState)
         {
+            d->_timeoutTimer.stop();
             d->_socket->abort();
             emit finished(false);
         }
