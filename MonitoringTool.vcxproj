@@ -108,8 +108,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\net\ICMPRequestWorker.cpp" />
     <ClCompile Include="src\net\ICMPServerMonitor.cpp" />
-    <ClCompile Include="src\net\UDPListener.cpp" />
     <ClCompile Include="src\net\UDPServerMonitor.cpp" />
+    <ClCompile Include="src\net\UDPWorker.cpp" />
     <ClCompile Include="src\ui\ControlButton.cpp" />
     <ClCompile Include="src\ui\MonitoringToolWidget.cpp" />
     <ClCompile Include="src\net\ServerMonitor.cpp">
@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <QtMoc Include="src\net\UDPListener.h" />
+    <QtMoc Include="src\net\UDPWorker.h" />
     <ClInclude Include="src\ui\StatusColor.h" />
     <ClInclude Include="src\ui\Separator.h" />
     <ClInclude Include="src\ui\ServerStatusWidget.h" />

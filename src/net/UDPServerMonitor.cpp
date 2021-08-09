@@ -1,5 +1,5 @@
 #include "UDPServerMonitor.h"
-#include "UDPListener.h"
+#include "UDPWorker.h"
 
 #include <QtNetwork/QUdpSocket>
 #include <QMessageBox>
@@ -28,20 +28,6 @@ public:
     }
 
     ~UDPServerMonitorPrivate() = default;
-
-    void showError(const QString &message)
-    {
-        Q_Q(UDPServerMonitor);
-
-        if (!::socket_errored)
-        {
-            QMessageBox::warning(nullptr, QString("Monitoring Tool"),
-                QString("UDP socket error for address %1:%2\n%3").arg(q->address()).arg(_port).arg(message),
-                QMessageBox::Ok, QMessageBox::Ok);
-        }
-        ::socket_errored = true;
-
-    }
 };
 
 net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObject *parent)
@@ -54,23 +40,7 @@ net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObjec
 
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        d->showError(QString("Could not startup WSA. Error code: %1").arg(WSAGetLastError()));
-
-    auto thread = new QThread();
-    auto listener = new UDPListener(d->_port);
-    listener->moveToThread(thread);
-
-    connect(thread, &QThread::started, listener, &UDPListener::start);
-    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
-
-    connect(listener, &UDPListener::ready, thread, &QThread::quit);
-    connect(listener, &UDPListener::ready, listener, &QObject::deleteLater);
-    connect(listener, &UDPListener::ready, this, [this](bool success)
-    {
-        emit finished(success);
-    });
-
-    thread->start();
+        qDebug() << QString("UDP check: could not startup WSA. Error code: %1").arg(WSAGetLastError());
 
     d->_port = port;
 }
@@ -86,30 +56,23 @@ void net::UDPServerMonitor::checkServer()
 
     qDebug() << QString("==== UDP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
 
-    int socksend;
-    const char *hello = "ping";
-    struct sockaddr_in addrsend;
+    auto thread = new QThread();
+    auto worker = new UDPWorker(d->_port);
+    worker->moveToThread(thread);
 
-    if ((socksend = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET)
+    connect(thread, &QThread::started, this, [this, worker]()
     {
-        d->showError(QString("Could not create sending socket"));
-        return;
-    }
+        Q_D(UDPServerMonitor);
+        worker->start(address());
+    });
+    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
-    memset(&addrsend, 0, sizeof(addrsend));
-
-    addrsend.sin_family = AF_INET;
-    addrsend.sin_addr.s_addr = inet_addr(address().toUtf8());
-    addrsend.sin_port = htons(d->_port);
-
-    int len = sizeof(addrsend);
-
-    int res = 0;
-    if ((res = sendto(socksend, hello, strlen(hello), 0, (const struct sockaddr *)&addrsend, len)) == SOCKET_ERROR)
+    connect(worker, &UDPWorker::ready, thread, &QThread::quit);
+    connect(worker, &UDPWorker::ready, worker, &QObject::deleteLater);
+    connect(worker, &UDPWorker::ready, this, [this](bool success)
     {
-        d->showError(QString("Error sending message [%1]").arg(WSAGetLastError()));
-        return;
-    }
+        emit finished(success);
+    });
 
-    qDebug() << "UDP Socket sent: " << res << " bytes";
+    thread->start();
 }
