@@ -64,6 +64,9 @@
     <ClCompile Include="src\core\AppSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\net\UDPListener.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\net\ICMPServerMonitor.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\net\UDPListener.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
