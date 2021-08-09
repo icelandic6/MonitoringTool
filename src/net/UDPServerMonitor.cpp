@@ -57,14 +57,10 @@ void net::UDPServerMonitor::checkServer()
     qDebug() << QString("==== UDP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
 
     auto thread = new QThread();
-    auto worker = new UDPWorker(d->_port);
+    auto worker = new UDPWorker(address(), d->_port);
     worker->moveToThread(thread);
 
-    connect(thread, &QThread::started, this, [this, worker]()
-    {
-        Q_D(UDPServerMonitor);
-        worker->start(address());
-    });
+    connect(thread, &QThread::started, worker, &UDPWorker::start);
     connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
     connect(worker, &UDPWorker::ready, thread, &QThread::quit);

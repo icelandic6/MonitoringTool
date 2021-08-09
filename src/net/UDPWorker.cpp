@@ -16,6 +16,7 @@ class net::UDPWorkerPrivate : public QObject
     UDPWorker *q_ptr = nullptr;
 
     const DWORD _timeout = 3000;
+    QString _address;
     int _port;
 
 public:
@@ -27,18 +28,19 @@ public:
     ~UDPWorkerPrivate() = default;
 };
 
-net::UDPWorker::UDPWorker(int port, QObject *parent /*= nullptr*/)
+net::UDPWorker::UDPWorker(const QString &address, int port, QObject *parent /*= nullptr*/)
     : QObject(parent)
     , d_ptr(new UDPWorkerPrivate(this))
 {
     Q_D(UDPWorker);
 
+    d->_address = address;
     d->_port = port;
 }
 
 net::UDPWorker::~UDPWorker() = default;
 
-void net::UDPWorker::start(const QString &addr)
+void net::UDPWorker::start()
 {
     Q_D(UDPWorker);
 
@@ -56,7 +58,7 @@ void net::UDPWorker::start(const QString &addr)
     memset(&addrsend, 0, sizeof(addrsend));
 
     addrsend.sin_family = AF_INET;
-    addrsend.sin_addr.s_addr = inet_addr(addr.toUtf8());
+    addrsend.sin_addr.s_addr = inet_addr(d->_address.toUtf8());
     addrsend.sin_port = htons(d->_port);
 
     int res = -1;

@@ -10,10 +10,10 @@ namespace net
         Q_OBJECT
 
     public:
-        explicit UDPWorker(int port, QObject *parent = nullptr);
+        explicit UDPWorker(const QString &address, int port, QObject *parent = nullptr);
         ~UDPWorker() override;
 
-        void start(const QString &addr);
+        void start();
 
     signals:
         void ready(bool success);
