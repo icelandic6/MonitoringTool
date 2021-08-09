@@ -102,8 +102,9 @@ void net::UDPWorker::start()
 
     if (res = recv(socksend, recvbuf, sizeof(recvbuf), 0) < 0)
     {
-        qDebug() << "Error: receive message [" << WSAGetLastError() << "]";
-        emit ready(false);
+        auto error = WSAGetLastError();
+        emit ready(error == WSAETIMEDOUT);
+        qDebug() << "Error: receive message [" << error << "]";
     }
     else
         emit ready(true);
