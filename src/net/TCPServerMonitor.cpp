@@ -48,8 +48,19 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
         emit finished(true);
     });
 
-    connect(d->_socket, SIGNAL(error(SocketError)),
-            this, SLOT(onError(QAbstractSocket::SocketError)));
+    connect(d->_socket, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
+        this, [this](QAbstractSocket::SocketError)
+    {
+        Q_D(TCPServerMonitor);
+
+        if (!d->_timeoutTimer.isActive())
+            return;
+
+        d->_timeoutTimer.stop();
+        d->_socket->close();
+
+        emit finished(false);
+    });
 
     connect(&d->_timeoutTimer, &QTimer::timeout, this, [this]()
     {
