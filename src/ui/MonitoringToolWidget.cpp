@@ -90,8 +90,11 @@ private:
             auto logs = core::Logger::instance()->logs();
             if (logs.isEmpty())
                 _logTextEdit->setText(QString("No logs here yet..."));
+            else
+                _logTextEdit->clear();
+
             while (!logs.isEmpty())
-                _logTextEdit->setText(logs.takeFirst());
+                _logTextEdit->append(logs.takeFirst());
 
             _logWindow->show();
         });
