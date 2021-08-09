@@ -27,7 +27,9 @@ public:
 
     void hostLookedUp(QHostInfo info)
     {
-        _ipv4Address = info.addresses().first();
+        auto addresses = info.addresses();
+        if (!addresses.isEmpty())
+            _ipv4Address = addresses.first();
     }
 
     void checkIPv4AddressUsage()
