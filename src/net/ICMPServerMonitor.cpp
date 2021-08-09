@@ -1,5 +1,6 @@
 #include "ICMPRequestWorker.h"
 #include "ICMPServerMonitor.h"
+#include "core/Logger.h"
 
 #include <QTimer>
 #include <QThread>
@@ -65,6 +66,7 @@ void net::ICMPServerMonitor::checkServer()
 
     if (d->_ipv4Address.isNull())
     {
+        core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
         emit finished(false);
         return;
     }

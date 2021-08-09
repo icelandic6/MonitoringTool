@@ -1,4 +1,5 @@
 #include "UDPWorker.h"
+#include "core/Logger.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "IPHLPAPI.lib")
@@ -51,7 +52,10 @@ void net::UDPWorker::start()
 
     if ((socksend = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET)
     {
-        qDebug() << "Error: create socket [" << WSAGetLastError() << "]";
+        core::Logger::instance()->addLog(
+            QString("Couldn't create UDP socket for server \"%1\". Error code: %2")
+            .arg(d->_address)
+            .arg(WSAGetLastError()));
         return;
     }
 
@@ -64,14 +68,20 @@ void net::UDPWorker::start()
     int res = -1;
     if ((res = ::connect(socksend, (const struct sockaddr *)&addrsend, sizeof(addrsend))) == SOCKET_ERROR)
     {
-        qDebug() << "Error: connect [" << WSAGetLastError() << "]";
+        core::Logger::instance()->addLog(
+            QString("Couldn't connect UDP socket to \"%1\". Error code: %2")
+            .arg(d->_address)
+            .arg(WSAGetLastError()));
         emit ready(false);
         return;
     }
 
     if ((res = send(socksend, hello, strlen(hello), 0)) == SOCKET_ERROR)
     {
-        qDebug() << "Error: send message [" << WSAGetLastError() << "]";
+        core::Logger::instance()->addLog(
+            QString("Couldn't send UDP message to \"%1\". Error code: %2")
+            .arg(d->_address)
+            .arg(WSAGetLastError()));
         emit ready(false);
         return;
     }
@@ -82,7 +92,10 @@ void net::UDPWorker::start()
         SOL_SOCKET, SO_RCVTIMEO,
         (char *)&d->_timeout, sizeof(d->_timeout))) == SOCKET_ERROR)
     {
-        qDebug() << "Error: setsockopt [" << WSAGetLastError() << "]";
+        core::Logger::instance()->addLog(
+            QString("Couldn't execute UDP socket setsockopt for \"%1\". Error code: %2")
+            .arg(d->_address)
+            .arg(WSAGetLastError()));
         emit ready(false);
         return;
     }

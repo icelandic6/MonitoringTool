@@ -1,4 +1,5 @@
 #include "AppSettings.h"
+#include "Logger.h"
 
 #include <QSettings>
 #include <QFile>
@@ -101,11 +102,7 @@ public:
             f.close();
 
             if (failed)
-            {
-                QMessageBox::warning(nullptr, QString("Monitoring Tool"),
-                    QString("Could not read some servers"),
-                    QMessageBox::Ok, QMessageBox::Ok);
-            }
+                Logger::instance()->addLog(QString("Could not read some servers"));
         }
         else
         {

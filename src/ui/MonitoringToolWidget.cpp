@@ -3,11 +3,14 @@
 #include "ControlButton.h"
 #include "Separator.h"
 #include "StatusColor.h"
+#include "core/Logger.h"
 
 #include <QGridLayout>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QSystemTrayIcon>
+#include <QTextEdit>
+#include <QMenu>
 
 class ui::MonitoringToolWidgetPrivate : public QObject
 {
@@ -31,6 +34,9 @@ class ui::MonitoringToolWidgetPrivate : public QObject
 
     QSystemTrayIcon *_trayIcon = nullptr;
     ushort _trayIconServerId = 0;
+
+    QWidget *_logWindow = nullptr;
+    QTextEdit *_logTextEdit = nullptr;
 
     QPoint _movePosition;
 
@@ -74,6 +80,49 @@ private:
         Q_Q(MonitoringToolWidget);
 
         _trayIcon = new QSystemTrayIcon(q);
+
+        createLogWidget();
+
+        auto menu = new QMenu(q);
+        auto showLogAction = new QAction(QString("Show Logs"), this);
+        connect(showLogAction, &QAction::triggered, this, [this]()
+        {
+            auto logs = core::Logger::instance()->logs();
+            if (logs.isEmpty())
+                _logTextEdit->setText(QString("No logs here yet..."));
+            while (!logs.isEmpty())
+                _logTextEdit->setText(logs.takeFirst());
+
+            _logWindow->show();
+        });
+        menu->addAction(showLogAction);
+
+        _trayIcon->setContextMenu(menu);
+    }
+
+    void createLogWidget()
+    {
+        _logWindow = new QWidget();
+        _logWindow->setWindowFlags(Qt::Window);
+        _logWindow->resize(640, 480);
+        _logWindow->setAttribute(Qt::WA_QuitOnClose, false);
+
+        _logTextEdit = new QTextEdit(_logWindow);
+        _logTextEdit->setReadOnly(true);
+        _logTextEdit->setText(QString("No logs here yet..."));
+
+        auto logger = core::Logger::instance();
+        connect(logger, &core::Logger::logAdded, this, [this](const QString &message)
+        {
+            _logTextEdit->append(message);
+        });
+
+        auto logLayout = new QHBoxLayout();
+        logLayout->setContentsMargins(0, 0, 0, 0);
+        logLayout->setSpacing(0);
+        logLayout->addWidget(_logTextEdit);
+
+        _logWindow->setLayout(logLayout);
     }
 
     void addServers(const QMap<ushort, QString> &serversInfo)
@@ -199,8 +248,14 @@ public:
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason)
     {
         Q_Q(MonitoringToolWidget);
-        q->show();
-        q->setWindowState(Qt::WindowActive);
+
+        if (reason == QSystemTrayIcon::ActivationReason::Context)
+            _trayIcon->contextMenu()->show();
+        else
+        {
+            q->show();
+            q->setWindowState(Qt::WindowActive);
+        }
     }
 
     void setTrayServerStatus(core::ServerStatus status)
@@ -249,7 +304,13 @@ ui::MonitoringToolWidget::MonitoringToolWidget(const QMap<ushort, QString> &serv
     connect(d->_trayIcon, &QSystemTrayIcon::activated, d, &MonitoringToolWidgetPrivate::trayIconActivated);
 }
 
-ui::MonitoringToolWidget::~MonitoringToolWidget() = default;
+ui::MonitoringToolWidget::~MonitoringToolWidget()
+{
+    Q_D(MonitoringToolWidget);
+
+    if (d->_logWindow)
+        delete d->_logWindow;
+}
 
 void ui::MonitoringToolWidget::setServerLatency(ushort serverId, int latency)
 {

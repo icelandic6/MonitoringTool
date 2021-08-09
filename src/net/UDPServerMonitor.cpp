@@ -1,15 +1,13 @@
 #include "UDPServerMonitor.h"
 #include "UDPWorker.h"
 
-#include <QtNetwork/QUdpSocket>
-#include <QMessageBox>
+#include "core/Logger.h"
+
 #include <QThread>
 
 #include "winsock2.h"
 #include "iphlpapi.h"
 #include "icmpapi.h"
-
-static bool socket_errored = false;
 
 class net::UDPServerMonitorPrivate : public QObject
 {
@@ -40,7 +38,8 @@ net::UDPServerMonitor::UDPServerMonitor(const QString &address, int port, QObjec
 
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        qDebug() << QString("UDP check: could not startup WSA. Error code: %1").arg(WSAGetLastError());
+        core::Logger::instance()->addLog(
+            QString("UDP check: could not startup WSA. Error code: %1").arg(WSAGetLastError()));
 
     d->_port = port;
 }
