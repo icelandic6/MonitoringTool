@@ -278,6 +278,12 @@ public:
         if (!_trayIcon->isVisible())
             _trayIcon->show();
     }
+
+    void setTrayServerTooltip(const QString &tooltip)
+    {
+        if (_trayIcon->toolTip() != tooltip)
+            _trayIcon->setToolTip(tooltip);
+    }
 };
 
 
@@ -342,9 +348,11 @@ void ui::MonitoringToolWidget::setTrayServerStatus(ushort serverId, core::Server
     d->_trayIconServerId = serverId;
 
     d->setTrayServerStatus(status);
+
+    d->setTrayServerTooltip(d->_statusWidgets[serverId]->name());
 }
 
-void ui::MonitoringToolWidget::setTrayServerTooltip(ushort serverId, int latency)
+void ui::MonitoringToolWidget::setTrayServerLatency(ushort serverId, int latency)
 {
     Q_D(MonitoringToolWidget);
 
@@ -355,8 +363,7 @@ void ui::MonitoringToolWidget::setTrayServerTooltip(ushort serverId, int latency
     if (latency)
         tooltip += QString(" %1ms").arg(latency);
 
-    if (d->_trayIcon->toolTip() != tooltip)
-        d->_trayIcon->setToolTip(tooltip);
+    d->setTrayServerTooltip(tooltip);
 }
 
 QSize ui::MonitoringToolWidget::sizeHint() const

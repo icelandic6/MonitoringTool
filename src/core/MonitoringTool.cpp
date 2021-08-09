@@ -59,9 +59,9 @@ public:
         _monitoringWidget->setTrayServerStatus(id, status);
     }
 
-    void updateTrayIconTooltip(ushort id, int latency)
+    void updateTrayIconLatency(ushort id, int latency)
     {
-        _monitoringWidget->setTrayServerTooltip(id, latency);
+        _monitoringWidget->setTrayServerLatency(id, latency);
     }
 
     void minimizeApp()
@@ -108,8 +108,8 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, d, &MonitoringToolPrivate::closeApp);
     connect(d->_serversManager, &ServersManager::serverStatusUpdated, d, &MonitoringToolPrivate::updateServerStatus);
     connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIconStatus);
-    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconTooltip);
     connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateServerLatency);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconLatency);
 
     d->_serversManager->startMonitoring();
 }
