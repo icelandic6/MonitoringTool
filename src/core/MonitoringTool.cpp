@@ -2,6 +2,7 @@
 #include "ServersManager.h"
 #include "ServerStatus.h"
 #include "AppSettings.h"
+#include "Logger.h"
 
 #include "ui/MonitoringToolWidget.h"
 
@@ -40,7 +41,11 @@ private:
     {
         _monitoringWidget = new ui::MonitoringToolWidget(info);
         _monitoringWidget->show();
-        _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
+
+        if (!info.isEmpty())
+            _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
+        else
+            Logger::instance()->addLog(QString("Servers list is empty"));
     }
 
 public:
