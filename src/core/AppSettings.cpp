@@ -110,6 +110,7 @@ public:
     QList<ServerInfo> readServersInfo() const
     {
         QList<ServerInfo> servers;
+        auto separator = " ";
 
         QFile f(_filename);
         if (f.open(QIODevice::ReadOnly))
@@ -129,20 +130,37 @@ public:
                 if (!resources)
                     continue;
 
-                QStringList addr = line.simplified().split(" ");
+                QStringList addr = line.simplified().split(separator);
                 if (addr.size() == 1 && addr.first().isEmpty())
                     continue;
 
-                if (addr.size() != 3)
+                if (addr.size() < 3)
                 {
                     Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
                     continue;
                 }
 
                 ServerInfo si;
-                si.name = addr[0];
-                si.addr = addr[1];
-                si.port = addr[2];
+
+                auto port = addr.takeLast();
+                bool isNumber = false;
+                port.toInt(&isNumber);
+                if (!port.contains("*") && port != icmpPortTag && !isNumber)
+                {
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
+                    continue;
+                }
+                si.port = port;
+
+                auto address = addr.takeLast();
+                if (!address.contains("."))
+                {
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
+                    continue;
+                }
+                si.addr = address;
+
+                si.name = addr.join(separator);
                 servers.append(si);
             }
 

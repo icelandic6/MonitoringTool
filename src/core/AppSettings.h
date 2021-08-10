@@ -5,6 +5,9 @@
 
 namespace core
 {
+    static QString icmpPortTag = "ICMP";
+    static QString udpPortTag = "*";
+
     struct ServerInfo
     {
         QString name;

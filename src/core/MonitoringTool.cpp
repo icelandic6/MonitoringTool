@@ -18,9 +18,6 @@ class core::MonitoringToolPrivate : public QObject
 
     ServersManager *_serversManager = nullptr;
 
-    QString _icmpPortTag = "ICMP";
-    QString _udpPortTag = "*";
-
 public:
     explicit MonitoringToolPrivate(MonitoringTool *q)
         : q_ptr(q)
@@ -96,10 +93,10 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     for (auto si : servers)
     {
         ushort id;
-        if (si.port == d->_icmpPortTag)
+        if (si.port == core::icmpPortTag)
             id = d->_serversManager->addICMPServer(si.name, si.addr);
-        else if (si.port.contains(d->_udpPortTag))
-            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(d->_udpPortTag).toInt());
+        else if (si.port.contains(core::udpPortTag))
+            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(core::udpPortTag).toInt());
         else
             id = d->_serversManager->addTCPServer(si.name, si.addr, si.port.toInt());
 
