@@ -30,6 +30,11 @@ class core::AppSettingsPrivate : public QObject
     const int _defaultFrequency = 15;
     const int _defaultSensitivity = 3;
 
+    const QString _defaultBackgroundColor = "dddddd";
+    const QString _defaultGreenColor = "5bb749";
+    const QString _defaultYellowColor = "fce23a";
+    const QString _defaultRedColor = "d6415f";
+
 public:
     explicit AppSettingsPrivate(AppSettings *q)
         : q_ptr(q)
@@ -38,26 +43,58 @@ public:
 
     ~AppSettingsPrivate() = default;
 
+    QColor readColor(const QSettings &settings, const QString &colorParameter, const QString &defaultColor)
+    {
+        auto strColor = settings.value(colorParameter, defaultColor).toString();
+        auto colorTemplate = QString("#%1");
+
+        if (strColor.size() != 6)
+        {
+            Logger::instance()->addLog(
+                QString("Could not read color, value \"%1\" is invalid. Using default color \"%2\"")
+                .arg(strColor)
+                .arg(colorTemplate.arg(defaultColor)));
+            strColor = defaultColor;
+        }
+
+        return QColor(colorTemplate.arg(strColor));
+    }
+
     void readSettings()
     {
         QSettings settings(_filename, QSettings::IniFormat);
 
         settings.beginGroup("colors");
-        _config.backgroundColor = QColor(QString("#%1")
-            .arg(settings.value("backgroundColor", "fafafa").toString()));
-        _config.greenColor = QColor(QString("#%1")
-            .arg(settings.value("greenColor", "5bb749").toString()));
-        _config.yellowColor = QColor(QString("#%1")
-            .arg(settings.value("yellowColor", "fce23a").toString()));
-        _config.redColor = QColor(QString("#%1")
-            .arg(settings.value("redColor", "d6415f").toString()));
+        _config.backgroundColor = readColor(settings, "backgroundColor", _defaultBackgroundColor);
+        _config.greenColor = readColor(settings, "greenColor", _defaultGreenColor);
+        _config.yellowColor = readColor(settings, "yellowColor", _defaultYellowColor);
+        _config.redColor = readColor(settings, "redColor", _defaultRedColor);
         settings.endGroup();
 
         settings.beginGroup("polling");
         auto userFrequency = settings.value("frequencySeconds", _defaultFrequency).toInt();
-        _config.frequencySeconds = std::max(userFrequency, 1);
+        if (userFrequency <= 0)
+        {
+            Logger::instance()->addLog(
+                QString("\"frequencySeconds\" parameter could be invalid, setting default value \"%1\"")
+                .arg(_defaultFrequency));
+            _config.frequencySeconds = _defaultFrequency;
+        }
+        else
+            _config.frequencySeconds = userFrequency;
+
         auto userSensitivity = settings.value("sensitivity", _defaultSensitivity).toInt();
-        _config.sensitivity = std::max(userSensitivity, 0);
+
+        if (userSensitivity < 0)
+        {
+            Logger::instance()->addLog(
+                QString("\"sensitivity\" parameter could be invalid, setting default value \"%1\"")
+                .arg(_defaultSensitivity));
+            _config.sensitivity = _defaultSensitivity;
+        }
+        else
+            _config.sensitivity = userSensitivity;
+
         settings.endGroup();
     }
 
