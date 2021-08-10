@@ -12,7 +12,7 @@ class net::TCPServerMonitorPrivate : public QObject
     QAbstractSocket* _socket = nullptr;
     int _port = 0;
 
-    const int _connectionTimeout = 8000;
+    const int _connectionTimeout = 4000;
     QTimer _timeoutTimer;
 
 public:

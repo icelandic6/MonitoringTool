@@ -2,7 +2,6 @@
 #include "ICMPServerMonitor.h"
 #include "core/Logger.h"
 
-#include <QTimer>
 #include <QThread>
 #include <QHostInfo>
 

@@ -88,6 +88,7 @@ private:
         connect(showLogAction, &QAction::triggered, this, [this]()
         {
             auto logs = core::Logger::instance()->logs();
+
             if (logs.isEmpty())
                 _logTextEdit->setText(QString("No logs here yet..."));
             else

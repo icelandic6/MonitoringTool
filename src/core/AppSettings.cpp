@@ -70,7 +70,6 @@ public:
         {
             QTextStream inStream(&f);
             bool resources = false;
-            bool failed = false;
 
             while (!inStream.atEnd())
             {
@@ -90,7 +89,7 @@ public:
 
                 if (addr.size() != 3)
                 {
-                    failed = true;
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
                     continue;
                 }
 
@@ -102,9 +101,6 @@ public:
             }
 
             f.close();
-
-            if (failed)
-                Logger::instance()->addLog(QString("Could not read some servers"));
         }
         else
         {
