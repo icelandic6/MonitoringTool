@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QFile>
 #include <QTextStream>
+#include <QDateTime>
 
 class core::LoggerPrivate : public QObject
 {
@@ -11,6 +12,8 @@ class core::LoggerPrivate : public QObject
     Logger *q_ptr = nullptr;
 
     QStringList _logs;
+
+    const short _maxLogs = 50;
 
 public:
     explicit LoggerPrivate(Logger *q)
@@ -37,12 +40,19 @@ core::Logger* core::Logger::instance()
     return _instance;
 }
 
-void core::Logger::addLog(const QString &message, bool critical)
+void core::Logger::addLog(const QString &message)
 {
     Q_D(Logger);
 
-    d->_logs.append(message);
-    emit logAdded(message, critical);
+    auto fullMessage = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
+        + ": "
+        + message;
+
+    if (d->_logs.size() >= d->_maxLogs)
+        d->_logs.removeFirst();
+
+    d->_logs.append(fullMessage);
+    emit logAdded(fullMessage);
 }
 
 QStringList core::Logger::logs() const

@@ -13,11 +13,11 @@ namespace core
 
         static Logger *instance();
 
-        void addLog(const QString &message, bool critical = false);
+        void addLog(const QString &message);
         QStringList logs() const;
 
     signals:
-        void logAdded(const QString &message, bool critical);
+        void logAdded(const QString &message);
 
     private:
         Logger();
