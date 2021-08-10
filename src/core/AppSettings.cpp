@@ -54,8 +54,10 @@ public:
         settings.endGroup();
 
         settings.beginGroup("polling");
-        _config.frequencySeconds = settings.value("frequencySeconds", _defaultFrequency).toInt();
-        _config.sensitivity = settings.value("sensitivity", _defaultFrequency).toInt();
+        auto userFrequency = settings.value("frequencySeconds", _defaultFrequency).toInt();
+        _config.frequencySeconds = std::max(userFrequency, 1);
+        auto userSensitivity = settings.value("sensitivity", _defaultSensitivity).toInt();
+        _config.sensitivity = std::max(userSensitivity, 0);
         settings.endGroup();
     }
 
