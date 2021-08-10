@@ -18,8 +18,6 @@ class core::MonitoringToolPrivate : public QObject
 
     ServersManager *_serversManager = nullptr;
 
-    QString _settingsFileName = QString("radhud.ini");
-
     QString _icmpPortTag = "ICMP";
     QString _udpPortTag = "*";
 
@@ -90,7 +88,7 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     d->createMonitorsManager();
 
     auto settings = AppSettings::instance();
-    settings->readFile(d->_settingsFileName);
+    settings->readSettings();
     
     auto servers = settings->serversInfo();
     QMap<ushort, QString> idNames;

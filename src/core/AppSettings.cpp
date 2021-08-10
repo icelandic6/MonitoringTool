@@ -24,7 +24,7 @@ class core::AppSettingsPrivate : public QObject
     Q_DISABLE_COPY(AppSettingsPrivate)
     AppSettings *q_ptr = nullptr;
 
-    QString _filename;
+    const QString _filename = QString("radhud.ini");
     AppConfig _config;
 
     const int _defaultFrequency = 15;
@@ -96,6 +96,15 @@ public:
             _config.sensitivity = userSensitivity;
 
         settings.endGroup();
+
+        if (!QFile::exists(_filename))
+        {
+            Logger::instance()->addLog(
+                QString("Ini-file \"%1\" not found. Default ini file created.")
+                .arg(_filename));
+
+            createDefaultIniFile();
+        }
     }
 
     QList<ServerInfo> readServersInfo() const
@@ -144,10 +153,39 @@ public:
             QMessageBox::critical(nullptr, QString("Monitoring Tool"),
                 QString("No %1 file found").arg(_filename),
                 QMessageBox::Ok, QMessageBox::Ok);
+
             exit(EXIT_FAILURE);
         }
 
         return servers;
+    }
+
+    void createDefaultIniFile()
+    {
+        QSettings settings(_filename, QSettings::IniFormat);
+
+        settings.beginGroup("colors");
+        settings.setValue("backgroundColor", _config.backgroundColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("greenColor", _config.greenColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("yellowColor", _config.yellowColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("redColor", _config.redColor.name(QColor::HexRgb).remove("#"));
+        settings.endGroup();
+
+        settings.beginGroup("polling");
+        settings.setValue("frequencySeconds", _config.frequencySeconds);
+        settings.setValue("sensitivity", _config.sensitivity);
+        settings.endGroup();
+
+        settings.sync();
+
+        QFile f(_filename);
+        if (!f.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text))
+            return;
+
+        QTextStream out(&f);
+        out << "\n" << "[resources]" << "\n";
+        out << "tcp_example\texample.com\t80" << "\n";
+        f.close();
     }
 };
 
@@ -159,11 +197,10 @@ core::AppSettings::AppSettings()
 
 core::AppSettings::~AppSettings() = default;
 
-void core::AppSettings::readFile(const QString &iniFileName)
+void core::AppSettings::readSettings()
 {
     Q_D(AppSettings);
 
-    d->_filename = iniFileName;
     d->readSettings();
 }
 
