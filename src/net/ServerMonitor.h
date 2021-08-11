@@ -18,7 +18,7 @@ namespace net
         virtual void checkServer() = 0;
 
     signals:
-        void finished(bool success, int latency = 0);
+        void finished(bool success, int latency = -1);
 
     private:
         QScopedPointer<ServerMonitorPrivate> d_ptr;

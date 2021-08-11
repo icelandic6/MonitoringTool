@@ -62,9 +62,12 @@ void ui::ServerStatusWidget::setLatency(int latency)
 {
     Q_D(ServerStatusWidget);
 
-    auto tooltip = QString("%1 %2ms").arg(d->_name).arg(latency);
-    if (tooltip != this->toolTip())
-        setToolTip(tooltip);
+    auto tooltipText = d->_name;
+    if (latency)
+        tooltipText += QString(" | %1 ms").arg(latency);
+
+    if (tooltipText != this->toolTip())
+        setToolTip(tooltipText);
 }
 
 void ui::ServerStatusWidget::paintEvent(QPaintEvent *event)

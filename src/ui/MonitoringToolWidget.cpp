@@ -364,8 +364,9 @@ void ui::MonitoringToolWidget::setTrayServerLatency(ushort serverId, int latency
         return;
 
     QString tooltip = d->_statusWidgets[serverId]->name();
+
     if (latency)
-        tooltip += QString(" %1ms").arg(latency);
+        tooltip += QString(" | %1ms").arg(latency);
 
     d->setTrayServerTooltip(tooltip);
 }
