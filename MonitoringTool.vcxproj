@@ -107,8 +107,8 @@
     <ClCompile Include="src\core\Server.cpp" />
     <ClCompile Include="src\core\ServersManager.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\net\ICMPRequestWorker.cpp" />
     <ClCompile Include="src\net\ICMPServerMonitor.cpp" />
+    <ClCompile Include="src\net\ICMPWorker.cpp" />
     <ClCompile Include="src\net\UDPServerMonitor.cpp" />
     <ClCompile Include="src\net\UDPWorker.cpp" />
     <ClCompile Include="src\ui\ControlButton.cpp" />
@@ -145,6 +145,7 @@
     <ClInclude Include="resource.h" />
     <QtMoc Include="src\net\UDPWorker.h" />
     <QtMoc Include="src\core\Logger.h" />
+    <QtMoc Include="src\net\ICMPWorker.h" />
     <ClInclude Include="src\ui\StatusColor.h" />
     <ClInclude Include="src\ui\Separator.h" />
     <ClInclude Include="src\ui\ServerStatusWidget.h" />
@@ -154,7 +155,6 @@
     <ClInclude Include="src\core\AppSettings.h" />
     <ClInclude Include="src\core\ServerStatus.h" />
     <QtMoc Include="src\ui\ControlButton.h" />
-    <QtMoc Include="src\net\ICMPRequestWorker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -40,9 +40,6 @@
     <ClCompile Include="src\net\ICMPServerMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\net\ICMPRequestWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ui\ControlButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -70,6 +67,9 @@
     <ClCompile Include="src\core\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\net\ICMPWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="resources\MonitoringTool.qrc">
@@ -89,9 +89,6 @@
     <QtMoc Include="src\net\UDPServerMonitor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\net\ICMPRequestWorker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="src\ui\ControlButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -108,6 +105,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\core\Logger.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\net\ICMPWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

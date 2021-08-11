@@ -1,5 +1,5 @@
-#include "ICMPRequestWorker.h"
 #include "ICMPServerMonitor.h"
+#include "ICMPWorker.h"
 #include "core/Logger.h"
 
 #include <QThread>
@@ -81,15 +81,15 @@ void net::ICMPServerMonitor::checkServer()
     }
 
     auto thread = new QThread();
-    auto worker = new ICMPRequestWorker(d->_ipv4Address.toString());
+    auto worker = new ICMPWorker(d->_ipv4Address.toString());
     worker->moveToThread(thread);
 
-    connect(thread, &QThread::started, worker, &ICMPRequestWorker::send_request);
+    connect(thread, &QThread::started, worker, &ICMPWorker::send_request);
     connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
-    connect(worker, &ICMPRequestWorker::ready, thread, &QThread::quit);
-    connect(worker, &ICMPRequestWorker::ready, worker, &QObject::deleteLater);
-    connect(worker, &ICMPRequestWorker::ready, this, [this](bool success, int latency)
+    connect(worker, &ICMPWorker::ready, thread, &QThread::quit);
+    connect(worker, &ICMPWorker::ready, worker, &QObject::deleteLater);
+    connect(worker, &ICMPWorker::ready, this, [this](bool success, int latency)
     {
         emit finished(success, latency);
     });

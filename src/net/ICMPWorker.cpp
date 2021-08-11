@@ -1,4 +1,4 @@
-#include "ICMPRequestWorker.h"
+#include "ICMPWorker.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "IPHLPAPI.lib")
@@ -9,37 +9,37 @@
 
 #include <chrono>
 
-class net::ICMPRequestWorkerPrivate : public QObject
+class net::ICMPWorkerPrivate : public QObject
 {
-    Q_DECLARE_PUBLIC(ICMPRequestWorker)
-    Q_DISABLE_COPY(ICMPRequestWorkerPrivate)
-    ICMPRequestWorker *q_ptr = nullptr;
+    Q_DECLARE_PUBLIC(ICMPWorker)
+    Q_DISABLE_COPY(ICMPWorkerPrivate)
+    ICMPWorker *q_ptr = nullptr;
 
     const int _timeout = 3000;
     QString _addr;
 
 public:
-    explicit ICMPRequestWorkerPrivate(ICMPRequestWorker *q)
+    explicit ICMPWorkerPrivate(ICMPWorker *q)
         : q_ptr(q)
     {
     }
 
-    ~ICMPRequestWorkerPrivate() = default;
+    ~ICMPWorkerPrivate() = default;
 };
 
-net::ICMPRequestWorker::ICMPRequestWorker(const QString &addr, QObject *parent /*= nullptr*/)
+net::ICMPWorker::ICMPWorker(const QString &addr, QObject *parent /*= nullptr*/)
     : QObject(parent)
-    , d_ptr(new ICMPRequestWorkerPrivate(this))
+    , d_ptr(new ICMPWorkerPrivate(this))
 {
-    Q_D(ICMPRequestWorker);
+    Q_D(ICMPWorker);
     d->_addr = addr;
 }
 
-net::ICMPRequestWorker::~ICMPRequestWorker() = default;
+net::ICMPWorker::~ICMPWorker() = default;
 
-void net::ICMPRequestWorker::send_request()
+void net::ICMPWorker::send_request()
 {
-    Q_D(ICMPRequestWorker);
+    Q_D(ICMPWorker);
 
     auto hIcmpFile = IcmpCreateFile();
     unsigned long ipaddr = inet_addr(d->_addr.toStdString().c_str());

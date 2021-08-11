@@ -82,11 +82,8 @@ net::UDPServerMonitor::~UDPServerMonitor() = default;
 
 void net::UDPServerMonitor::checkServer()
 {
-    qDebug() << "\n==== Running UDP server check";
 
     Q_D(UDPServerMonitor);
-
-    qDebug() << QString("==== UDP CHECK: CONNECTING TO %1:%2").arg(address()).arg(d->_port);
 
     if (d->_ipv4Address.isNull())
     {
