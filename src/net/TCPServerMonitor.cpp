@@ -1,4 +1,5 @@
 #include "TCPServerMonitor.h"
+#include "core/Logger.h"
 
 #include <QtNetwork/QTcpSocket>
 #include <QTimer>
@@ -14,6 +15,7 @@ class net::TCPServerMonitorPrivate : public QObject
 
     const int _connectionTimeout = 4000;
     QTimer _timeoutTimer;
+    bool _resolveFailed = false;
 
 public:
     explicit TCPServerMonitorPrivate(TCPServerMonitor *q)
@@ -47,9 +49,15 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     });
 
     connect(d->_socket, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
-        this, [this](QAbstractSocket::SocketError)
+        this, [this] (QAbstractSocket::SocketError error)
     {
         Q_D(TCPServerMonitor);
+
+        if (error == QAbstractSocket::SocketError::HostNotFoundError && !d->_resolveFailed)
+        {
+            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1:%2]").arg(this->address()).arg(d->_port));
+            d->_resolveFailed = true;
+        }
 
         if (!d->_timeoutTimer.isActive())
             return;

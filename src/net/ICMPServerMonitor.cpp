@@ -70,7 +70,7 @@ void net::ICMPServerMonitor::checkServer()
     {
         if (!d->_resolveFailed)
         {
-            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
+            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1:ICMP]").arg(address()));
             d->_resolveFailed = true;
         }
 

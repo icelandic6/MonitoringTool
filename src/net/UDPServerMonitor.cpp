@@ -92,7 +92,7 @@ void net::UDPServerMonitor::checkServer()
     {
         if (!d->_resolveFailed)
         {
-            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
+            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1:%2]").arg(address()).arg(d->_port));
             d->_resolveFailed = true;
         }
 
