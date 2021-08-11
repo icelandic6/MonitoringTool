@@ -80,22 +80,21 @@ void net::ICMPServerMonitor::checkServer()
         return;
     }
 
-    auto _requestThread = new QThread();
+    auto thread = new QThread();
+    auto worker = new ICMPRequestWorker(d->_ipv4Address.toString());
+    worker->moveToThread(thread);
 
-    auto _requestWorker = new ICMPRequestWorker(d->_ipv4Address.toString());
-    _requestWorker->moveToThread(_requestThread);
+    connect(thread, &QThread::started, worker, &ICMPRequestWorker::send_request);
+    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
-    connect(_requestThread, &QThread::started, _requestWorker, &ICMPRequestWorker::send_request);
-    connect(_requestThread, &QThread::finished, _requestThread, &QObject::deleteLater);
-
-    connect(_requestWorker, &ICMPRequestWorker::ready, _requestThread, &QThread::quit);
-    connect(_requestWorker, &ICMPRequestWorker::ready, _requestWorker, &QObject::deleteLater);
-    connect(_requestWorker, &ICMPRequestWorker::ready, this, [this](bool success, int latency)
+    connect(worker, &ICMPRequestWorker::ready, thread, &QThread::quit);
+    connect(worker, &ICMPRequestWorker::ready, worker, &QObject::deleteLater);
+    connect(worker, &ICMPRequestWorker::ready, this, [this](bool success, int latency)
     {
         emit finished(success, latency);
     });
 
-    _requestThread->start();
+    thread->start();
 
     if (d->_useResolving)
         d->checkIPv4AddressUsage();
