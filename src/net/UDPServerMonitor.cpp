@@ -23,6 +23,7 @@ class net::UDPServerMonitorPrivate : public QObject
     bool _useResolving = false;
     ushort _ipv4AddressUsages = 0;
     const ushort _ipv4AddressUsageMax = 60;
+    bool _resolveFailed = false;
 
 public:
     explicit UDPServerMonitorPrivate(UDPServerMonitor *q)
@@ -89,7 +90,11 @@ void net::UDPServerMonitor::checkServer()
 
     if (d->_ipv4Address.isNull())
     {
-        core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
+        if (!d->_resolveFailed)
+        {
+            core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
+            d->_resolveFailed = true;
+        }
         emit finished(false);
         return;
     }
