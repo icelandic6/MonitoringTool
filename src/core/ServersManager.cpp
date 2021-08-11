@@ -59,7 +59,7 @@ public:
 
         auto server = static_cast<Server*>(sender());
 
-        if (latency)
+        if (latency != -1)
             emit q->serverLatencyUpdated(server->id(), latency);
     }
 

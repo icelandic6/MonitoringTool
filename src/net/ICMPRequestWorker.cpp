@@ -62,9 +62,17 @@ void net::ICMPRequestWorker::send_request()
     auto timeEnd = std::chrono::high_resolution_clock::now();
     auto latency = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count();
 
-    free(ReplyBuffer);
-
     IcmpCloseHandle(hIcmpFile);
 
-    emit ready(dwRetVal != 0, dwRetVal == 0 ? 0 : latency);
+    if (dwRetVal == 0)
+    {
+        free(ReplyBuffer);
+        emit ready(false, 0);
+        return;
+    }
+
+    auto success = ((PICMP_ECHO_REPLY)ReplyBuffer)->Status == IP_SUCCESS;
+
+    free(ReplyBuffer);
+    emit ready(success, success ? latency : 0);
 }

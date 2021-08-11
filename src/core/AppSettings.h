@@ -5,6 +5,9 @@
 
 namespace core
 {
+    static QString icmpPortTag = "ICMP";
+    static QString udpPortTag = "*";
+
     struct ServerInfo
     {
         QString name;
@@ -20,7 +23,7 @@ namespace core
 
         static AppSettings *instance();
 
-        void readFile(const QString &iniFileName);
+        void readSettings();
 
         QColor backgroundColor() const;
         QColor greenColor() const;

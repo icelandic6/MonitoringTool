@@ -27,9 +27,9 @@ public:
 
     ~ServerPrivate() = default;
 
-    void handleCheck(bool success, int latency = 0)
+    void handleCheck(bool success, int latency = -1)
     {
-        if (latency != 0)
+        if (latency != -1)
         {
             Q_Q(Server);
             emit q->latencyChanged(latency);

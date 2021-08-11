@@ -2,6 +2,7 @@
 #include "ServersManager.h"
 #include "ServerStatus.h"
 #include "AppSettings.h"
+#include "Logger.h"
 
 #include "ui/MonitoringToolWidget.h"
 
@@ -16,11 +17,6 @@ class core::MonitoringToolPrivate : public QObject
     ui::MonitoringToolWidget *_monitoringWidget = nullptr;
 
     ServersManager *_serversManager = nullptr;
-
-    QString _settingsFileName = QString("radhud.ini");
-
-    QString _icmpPortTag = "ICMP";
-    QString _udpPortTag = "*";
 
 public:
     explicit MonitoringToolPrivate(MonitoringTool *q)
@@ -40,7 +36,11 @@ private:
     {
         _monitoringWidget = new ui::MonitoringToolWidget(info);
         _monitoringWidget->show();
-        _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
+
+        if (!info.isEmpty())
+            _monitoringWidget->setTrayServerStatus(info.keys().first(), core::ServerStatus::Available);
+        else
+            Logger::instance()->addLog(QString("Servers list is empty"));
     }
 
 public:
@@ -59,9 +59,9 @@ public:
         _monitoringWidget->setTrayServerStatus(id, status);
     }
 
-    void updateTrayIconTooltip(ushort id, int latency)
+    void updateTrayIconLatency(ushort id, int latency)
     {
-        _monitoringWidget->setTrayServerTooltip(id, latency);
+        _monitoringWidget->setTrayServerLatency(id, latency);
     }
 
     void minimizeApp()
@@ -85,7 +85,7 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     d->createMonitorsManager();
 
     auto settings = AppSettings::instance();
-    settings->readFile(d->_settingsFileName);
+    settings->readSettings();
     
     auto servers = settings->serversInfo();
     QMap<ushort, QString> idNames;
@@ -93,10 +93,10 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     for (auto si : servers)
     {
         ushort id;
-        if (si.port == d->_icmpPortTag)
+        if (si.port == core::icmpPortTag)
             id = d->_serversManager->addICMPServer(si.name, si.addr);
-        else if (si.port.contains(d->_udpPortTag))
-            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(d->_udpPortTag).toInt());
+        else if (si.port.contains(core::udpPortTag))
+            id = d->_serversManager->addUDPServer(si.name, si.addr, si.port.remove(core::udpPortTag).toInt());
         else
             id = d->_serversManager->addTCPServer(si.name, si.addr, si.port.toInt());
 
@@ -108,8 +108,8 @@ core::MonitoringTool::MonitoringTool(QObject *parent)
     connect(d->_monitoringWidget, &ui::MonitoringToolWidget::closeApp, d, &MonitoringToolPrivate::closeApp);
     connect(d->_serversManager, &ServersManager::serverStatusUpdated, d, &MonitoringToolPrivate::updateServerStatus);
     connect(d->_serversManager, &ServersManager::worstServerUpdated, d, &MonitoringToolPrivate::updateTrayIconStatus);
-    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconTooltip);
     connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateServerLatency);
+    connect(d->_serversManager, &ServersManager::serverLatencyUpdated, d, &MonitoringToolPrivate::updateTrayIconLatency);
 
     d->_serversManager->startMonitoring();
 }

@@ -19,7 +19,7 @@ namespace ui
         void setServerStatus(ushort serverId, core::ServerStatus status);
 
         void setTrayServerStatus(ushort serverId, core::ServerStatus status);
-        void setTrayServerTooltip(ushort serverId, int latency = 0);
+        void setTrayServerLatency(ushort serverId, int latency = 0);
 
         QSize sizeHint() const override;
 
