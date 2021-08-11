@@ -83,22 +83,10 @@ void net::TCPServerMonitor::checkServer()
 
     if (d->_timeoutTimer.isActive() && d->_socket->state() == QAbstractSocket::SocketState::ConnectingState)
         emit finished(false);
+
     d->_timeoutTimer.stop();
     d->_socket->abort();
 
-    d->_socket->connectToHost(address(), d->_port);
     d->_timeoutTimer.start();
-}
-
-void net::TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
-{
-    Q_D(TCPServerMonitor);
-
-    if (!d->_timeoutTimer.isActive())
-        return;
-
-    d->_timeoutTimer.stop();
-    d->_socket->close();
-
-    emit finished(false);
+    d->_socket->connectToHost(address(), d->_port);
 }
