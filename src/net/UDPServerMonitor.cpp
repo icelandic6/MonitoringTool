@@ -95,7 +95,10 @@ void net::UDPServerMonitor::checkServer()
             core::Logger::instance()->addLog(QString("Couldn't resolve IP address [%1]").arg(address()));
             d->_resolveFailed = true;
         }
+
         emit finished(false);
+        QHostInfo::lookupHost(address(), d, &UDPServerMonitorPrivate::hostLookedUp);
+
         return;
     }
 
