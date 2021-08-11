@@ -36,8 +36,6 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     d->_socket = new QTcpSocket(this);
     d->_port = port;
 
-    qRegisterMetaType<QTcpSocket::SocketError>("SocketError");
-
     connect(d->_socket, &QTcpSocket::connected, this, [this]()
     {
         Q_D(TCPServerMonitor);
