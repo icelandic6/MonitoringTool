@@ -12,7 +12,7 @@ class net::TCPServerMonitorPrivate : public QObject
     QAbstractSocket* _socket = nullptr;
     int _port = 0;
 
-    const int _connectionTimeout = 8000;
+    const int _connectionTimeout = 4000;
     QTimer _timeoutTimer;
 
 public:
@@ -36,8 +36,6 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
     d->_socket = new QTcpSocket(this);
     d->_port = port;
 
-    qRegisterMetaType<QTcpSocket::SocketError>("SocketError");
-
     connect(d->_socket, &QTcpSocket::connected, this, [this]()
     {
         Q_D(TCPServerMonitor);
@@ -48,8 +46,19 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
         emit finished(true);
     });
 
-    connect(d->_socket, SIGNAL(error(SocketError)),
-            this, SLOT(onError(QAbstractSocket::SocketError)));
+    connect(d->_socket, static_cast<void(QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
+        this, [this](QAbstractSocket::SocketError)
+    {
+        Q_D(TCPServerMonitor);
+
+        if (!d->_timeoutTimer.isActive())
+            return;
+
+        d->_timeoutTimer.stop();
+        d->_socket->close();
+
+        emit finished(false);
+    });
 
     connect(&d->_timeoutTimer, &QTimer::timeout, this, [this]()
     {
@@ -57,6 +66,7 @@ net::TCPServerMonitor::TCPServerMonitor(const QString &address, int port, QObjec
 
         if (d->_socket->state() != QAbstractSocket::SocketState::ConnectedState)
         {
+            d->_timeoutTimer.stop();
             d->_socket->abort();
             emit finished(false);
         }
@@ -71,22 +81,10 @@ void net::TCPServerMonitor::checkServer()
 
     if (d->_timeoutTimer.isActive() && d->_socket->state() == QAbstractSocket::SocketState::ConnectingState)
         emit finished(false);
+
     d->_timeoutTimer.stop();
     d->_socket->abort();
 
-    d->_socket->connectToHost(address(), d->_port);
     d->_timeoutTimer.start();
-}
-
-void net::TCPServerMonitor::onError(QAbstractSocket::SocketError socketError)
-{
-    Q_D(TCPServerMonitor);
-
-    if (!d->_timeoutTimer.isActive())
-        return;
-
-    d->_timeoutTimer.stop();
-    d->_socket->close();
-
-    emit finished(false);
+    d->_socket->connectToHost(address(), d->_port);
 }

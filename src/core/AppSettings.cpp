@@ -1,4 +1,5 @@
 #include "AppSettings.h"
+#include "Logger.h"
 
 #include <QSettings>
 #include <QFile>
@@ -23,11 +24,16 @@ class core::AppSettingsPrivate : public QObject
     Q_DISABLE_COPY(AppSettingsPrivate)
     AppSettings *q_ptr = nullptr;
 
-    QString _filename;
+    const QString _filename = QString("radhud.ini");
     AppConfig _config;
 
     const int _defaultFrequency = 15;
     const int _defaultSensitivity = 3;
+
+    const QString _defaultBackgroundColor = "dddddd";
+    const QString _defaultGreenColor = "5bb749";
+    const QString _defaultYellowColor = "fce23a";
+    const QString _defaultRedColor = "d6415f";
 
 public:
     explicit AppSettingsPrivate(AppSettings *q)
@@ -37,37 +43,80 @@ public:
 
     ~AppSettingsPrivate() = default;
 
+    QColor readColor(const QSettings &settings, const QString &colorParameter, const QString &defaultColor)
+    {
+        auto strColor = settings.value(colorParameter, defaultColor).toString();
+        auto colorTemplate = QString("#%1");
+
+        if (strColor.size() != 6)
+        {
+            Logger::instance()->addLog(
+                QString("Could not read color, value \"%1\" is invalid. Using default color \"%2\"")
+                .arg(strColor)
+                .arg(colorTemplate.arg(defaultColor)));
+            strColor = defaultColor;
+        }
+
+        return QColor(colorTemplate.arg(strColor));
+    }
+
     void readSettings()
     {
         QSettings settings(_filename, QSettings::IniFormat);
 
         settings.beginGroup("colors");
-        _config.backgroundColor = QColor(QString("#%1")
-            .arg(settings.value("backgroundColor", "fafafa").toString()));
-        _config.greenColor = QColor(QString("#%1")
-            .arg(settings.value("greenColor", "5bb749").toString()));
-        _config.yellowColor = QColor(QString("#%1")
-            .arg(settings.value("yellowColor", "fce23a").toString()));
-        _config.redColor = QColor(QString("#%1")
-            .arg(settings.value("redColor", "d6415f").toString()));
+        _config.backgroundColor = readColor(settings, "backgroundColor", _defaultBackgroundColor);
+        _config.greenColor = readColor(settings, "greenColor", _defaultGreenColor);
+        _config.yellowColor = readColor(settings, "yellowColor", _defaultYellowColor);
+        _config.redColor = readColor(settings, "redColor", _defaultRedColor);
         settings.endGroup();
 
         settings.beginGroup("polling");
-        _config.frequencySeconds = settings.value("frequencySeconds", _defaultFrequency).toInt();
-        _config.sensitivity = settings.value("sensitivity", _defaultFrequency).toInt();
+        auto userFrequency = settings.value("frequencySeconds", _defaultFrequency).toInt();
+        if (userFrequency <= 0)
+        {
+            Logger::instance()->addLog(
+                QString("\"frequencySeconds\" parameter could be invalid, setting default value \"%1\"")
+                .arg(_defaultFrequency));
+            _config.frequencySeconds = _defaultFrequency;
+        }
+        else
+            _config.frequencySeconds = userFrequency;
+
+        auto userSensitivity = settings.value("sensitivity", _defaultSensitivity).toInt();
+
+        if (userSensitivity < 0)
+        {
+            Logger::instance()->addLog(
+                QString("\"sensitivity\" parameter could be invalid, setting default value \"%1\"")
+                .arg(_defaultSensitivity));
+            _config.sensitivity = _defaultSensitivity;
+        }
+        else
+            _config.sensitivity = userSensitivity;
+
         settings.endGroup();
+
+        if (!QFile::exists(_filename))
+        {
+            Logger::instance()->addLog(
+                QString("Ini-file \"%1\" not found. Default ini file created.")
+                .arg(_filename));
+
+            createDefaultIniFile();
+        }
     }
 
     QList<ServerInfo> readServersInfo() const
     {
         QList<ServerInfo> servers;
+        auto separator = " ";
 
         QFile f(_filename);
         if (f.open(QIODevice::ReadOnly))
         {
             QTextStream inStream(&f);
             bool resources = false;
-            bool failed = false;
 
             while (!inStream.atEnd())
             {
@@ -81,41 +130,80 @@ public:
                 if (!resources)
                     continue;
 
-                QStringList addr = line.simplified().split(" ");
+                QStringList addr = line.simplified().split(separator);
                 if (addr.size() == 1 && addr.first().isEmpty())
                     continue;
 
-                if (addr.size() != 3)
+                if (addr.size() < 3)
                 {
-                    failed = true;
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
                     continue;
                 }
 
                 ServerInfo si;
-                si.name = addr[0];
-                si.addr = addr[1];
-                si.port = addr[2];
+
+                auto port = addr.takeLast();
+                bool isNumber = false;
+                port.toInt(&isNumber);
+                if (!port.contains("*") && port != icmpPortTag && !isNumber)
+                {
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
+                    continue;
+                }
+                si.port = port;
+
+                auto address = addr.takeLast();
+                if (!address.contains("."))
+                {
+                    Logger::instance()->addLog(QString("Could not read line \"%1\"").arg(line));
+                    continue;
+                }
+                si.addr = address;
+
+                si.name = addr.join(separator);
                 servers.append(si);
             }
 
             f.close();
-
-            if (failed)
-            {
-                QMessageBox::warning(nullptr, QString("Monitoring Tool"),
-                    QString("Could not read some servers"),
-                    QMessageBox::Ok, QMessageBox::Ok);
-            }
         }
         else
         {
             QMessageBox::critical(nullptr, QString("Monitoring Tool"),
                 QString("No %1 file found").arg(_filename),
                 QMessageBox::Ok, QMessageBox::Ok);
+
             exit(EXIT_FAILURE);
         }
 
         return servers;
+    }
+
+    void createDefaultIniFile()
+    {
+        QSettings settings(_filename, QSettings::IniFormat);
+
+        settings.beginGroup("colors");
+        settings.setValue("backgroundColor", _config.backgroundColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("greenColor", _config.greenColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("yellowColor", _config.yellowColor.name(QColor::HexRgb).remove("#"));
+        settings.setValue("redColor", _config.redColor.name(QColor::HexRgb).remove("#"));
+        settings.endGroup();
+
+        settings.beginGroup("polling");
+        settings.setValue("frequencySeconds", _config.frequencySeconds);
+        settings.setValue("sensitivity", _config.sensitivity);
+        settings.endGroup();
+
+        settings.sync();
+
+        QFile f(_filename);
+        if (!f.open(QIODevice::ReadWrite | QIODevice::Append | QIODevice::Text))
+            return;
+
+        QTextStream out(&f);
+        out << "\n" << "[resources]" << "\n";
+        out << "tcp_example\texample.com\t80" << "\n";
+        f.close();
     }
 };
 
@@ -127,11 +215,10 @@ core::AppSettings::AppSettings()
 
 core::AppSettings::~AppSettings() = default;
 
-void core::AppSettings::readFile(const QString &iniFileName)
+void core::AppSettings::readSettings()
 {
     Q_D(AppSettings);
 
-    d->_filename = iniFileName;
     d->readSettings();
 }
 
